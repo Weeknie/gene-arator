@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc",
     "demo": "tsx src/demo.ts",
+    "examples": "tsx src/examples.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
