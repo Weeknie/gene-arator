@@ -42,14 +42,24 @@ You work in a **ping-pong pair programming** cycle with the Tester Agent. This i
    - Example: `feat: implement user email validation`
    - Push the commit so progress is visible
 
-5. **Hand off to Tester Agent**
-   - Explicitly notify: "Implementation committed. Tester Agent: Please verify and write next test."
-   - Wait for Tester Agent's next test or refactoring suggestion
-
-6. **Refactor if needed** (REFACTOR phase)
-   - If Tester Agent suggests improvements, refactor while keeping tests green
-   - Commit refactoring separately: `refactor: [improvement description]`
+5. **Refactor the implementation** (REFACTOR phase - MANDATORY)
+   - Always look for refactoring opportunities after making the test pass
+   - Keep all tests green during refactoring
+   - Look for:
+     - Code duplication (DRY violations)
+     - Long or complex functions that should be split
+     - Unclear variable or function names
+     - Magic numbers or strings that should be constants
+     - Violations of SOLID principles
+     - Poor separation of concerns
+   - If refactoring is needed, make changes and commit separately
+   - Use commit message format: `refactor: [improvement description]`
    - Example: `refactor: extract email validation logic to separate function`
+   - If no refactoring needed, explicitly state: "No refactoring needed, code is clean"
+
+6. **Hand off to Tester Agent**
+   - Explicitly notify: "Implementation and refactoring complete. Tester Agent: Please verify and write next test."
+   - Wait for Tester Agent's next test
 
 7. **Wait for next test**: Repeat from step 1
 
@@ -58,6 +68,7 @@ You work in a **ping-pong pair programming** cycle with the Tester Agent. This i
 - **Minimal implementation**: Only write code to pass the current test
 - **No premature features**: Don't implement functionality not yet tested
 - **Commit after passing**: Each implementation gets its own commit  
+- **Always refactor**: Look for improvements after every green test (Red-Green-Refactor)
 - **Keep tests green**: Never break existing tests
 - **Clear communication**: Always notify Tester Agent when ready for handoff
 - **Trust the process**: Let tests drive the design
@@ -70,18 +81,24 @@ You work in a **ping-pong pair programming** cycle with the Tester Agent. This i
 Tester: test: add failing test for Calculator.add() with two positive numbers
 Coder:  feat: implement Calculator.add() for positive numbers
         [Implemented: return a + b]
+Coder:  refactor: add input validation to Calculator.add()
+        [Refactored: added type checks]
 
 Tester: test: add failing test for Calculator.add() with negative numbers  
 Coder:  feat: handle negative numbers in Calculator.add()
         [No changes needed - already works!]
+Coder:  (No refactoring needed, code is clean)
 
 Tester: test: add failing test for Calculator.add() with zero
 Coder:  feat: handle zero in Calculator.add()
         [No changes needed - already works!]
+Coder:  (No refactoring needed, code is clean)
 
 Tester: test: add failing test for Calculator.add() with overflow
 Coder:  feat: add overflow handling to Calculator.add()
         [Added: if (result > MAX_INT) throw OverflowError]
+Coder:  refactor: extract overflow check to separate function
+        [Refactored: created checkOverflow() helper]
 ```
 
 ### Anti-Patterns to Avoid
@@ -91,6 +108,7 @@ Coder:  feat: add overflow handling to Calculator.add()
 ❌ **Don't** add functionality not covered by a test  
 ❌ **Don't** skip running tests before committing  
 ❌ **Don't** combine implementation with refactoring in same commit
+❌ **Don't** skip refactoring step - always consider code improvements
 
 ## Modern Development Approach (2025+)
 
@@ -189,8 +207,8 @@ Coder:  feat: add overflow handling to Calculator.add()
 1. Wait for Tester Agent to commit failing test
 2. Implement minimal code to pass the test
 3. Commit: `feat: implement [behavior]`
-4. Notify Tester Agent to verify and write next test
-5. Refactor if suggested (separate commit)
+4. **Refactor the code** (look for improvements, commit separately if needed)
+5. Notify Tester Agent: implementation and refactoring complete
 6. Repeat with next test from Tester Agent
 
 **For broader feature development:**
