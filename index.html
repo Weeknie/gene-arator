@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gene-arator Grid</title>
+    <link rel="stylesheet" href="src/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gene-arator Grid</h1>
+        </header>
+        
+        <div class="controls">
+            <label for="grid-size">Grid Size:</label>
+            <input type="number" id="grid-size" min="1" max="50" value="10">
+            <button id="apply-size">Apply</button>
+        </div>
+        
+        <div id="grid-container"></div>
+    </div>
+    
+    <script type="module" src="src/js/app.js"></script>
+</body>
+</html>
