@@ -3,6 +3,18 @@ class GridRenderer {
     this.container = container;
   }
 
+  getCellColor(cell) {
+    const r = Math.min(255, Math.floor(cell.getProteinAmount('R')));
+    const g = Math.min(255, Math.floor(cell.getProteinAmount('G')));
+    const b = Math.min(255, Math.floor(cell.getProteinAmount('B')));
+    
+    if (r === 0 && g === 0 && b === 0) {
+      return '';
+    }
+    
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
   render(grid) {
     // Clear the container
     this.container.innerHTML = '';
@@ -22,6 +34,12 @@ class GridRenderer {
         cellElement.className = 'grid-cell';
         cellElement.dataset.x = cell.x;
         cellElement.dataset.y = cell.y;
+        
+        // Apply color based on proteins
+        const color = this.getCellColor(cell);
+        if (color) {
+          cellElement.style.backgroundColor = color;
+        }
         
         rowElement.appendChild(cellElement);
       }
