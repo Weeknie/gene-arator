@@ -44,4 +44,20 @@ describe('Grid', () => {
       }
     }
   });
+
+  test('should apply decay to all cells on tick', () => {
+    const grid = new Grid(3, 3);
+    
+    // Add proteins to some cells
+    grid.getCell(0, 0).addProtein('R', 100);
+    grid.getCell(1, 1).addProtein('G', 50);
+    grid.getCell(2, 2).addProtein('B', 80);
+    
+    grid.tick();
+    
+    // Assuming default decay rate of 0.1 (10%)
+    expect(grid.getCell(0, 0).getProteinAmount('R')).toBe(90);
+    expect(grid.getCell(1, 1).getProteinAmount('G')).toBe(45);
+    expect(grid.getCell(2, 2).getProteinAmount('B')).toBe(72);
+  });
 });

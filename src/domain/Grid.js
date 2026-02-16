@@ -1,9 +1,10 @@
 const Cell = require('./Cell');
 
 class Grid {
-  constructor(width, height) {
+  constructor(width, height, decayRate = 0.1) {
     this.width = width;
     this.height = height;
+    this.decayRate = decayRate;
     this.cells = [];
     
     // Initialize grid with cells
@@ -17,6 +18,15 @@ class Grid {
 
   getCell(x, y) {
     return this.cells[y][x];
+  }
+
+  tick() {
+    // Apply decay to all cells
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        this.cells[y][x].decay(this.decayRate);
+      }
+    }
   }
 }
 
