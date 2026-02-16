@@ -150,4 +150,61 @@ describe('GridRenderer', () => {
     // Should either be empty or rgb(0, 0, 0)
     expect(bgColor === '' || bgColor === 'rgb(0, 0, 0)' || bgColor === 'rgba(0, 0, 0, 0)').toBe(true);
   });
+
+  test('should attach click handlers to cells when enableProteinInjection is called', () => {
+    const grid = new Grid(3, 3);
+    const renderer = new GridRenderer(container);
+    renderer.render(grid);
+    
+    renderer.enableProteinInjection(grid, 'R', 100);
+    
+    const cell = container.querySelector('[data-x="1"][data-y="1"]');
+    cell.click();
+    
+    // Cell should now have the protein
+    expect(grid.getCell(1, 1).getProteinAmount('R')).toBe(100);
+  });
+
+  test('should add protein when cell is clicked', () => {
+    const grid = new Grid(3, 3);
+    const renderer = new GridRenderer(container);
+    renderer.render(grid);
+    
+    renderer.enableProteinInjection(grid, 'G', 50);
+    
+    const cell = container.querySelector('[data-x="0"][data-y="0"]');
+    cell.click();
+    
+    expect(grid.getCell(0, 0).getProteinAmount('G')).toBe(50);
+  });
+
+  test('should update selected protein type', () => {
+    const grid = new Grid(3, 3);
+    const renderer = new GridRenderer(container);
+    renderer.render(grid);
+    
+    renderer.enableProteinInjection(grid, 'R', 100);
+    renderer.setSelectedProtein('B');
+    
+    const cell = container.querySelector('[data-x="1"][data-y="1"]');
+    cell.click();
+    
+    // Cell should have B protein, not R
+    expect(grid.getCell(1, 1).getProteinAmount('B')).toBe(100);
+    expect(grid.getCell(1, 1).getProteinAmount('R')).toBe(0);
+  });
+
+  test('should update injection amount', () => {
+    const grid = new Grid(3, 3);
+    const renderer = new GridRenderer(container);
+    renderer.render(grid);
+    
+    renderer.enableProteinInjection(grid, 'R', 100);
+    renderer.setInjectionAmount(50);
+    
+    const cell = container.querySelector('[data-x="1"][data-y="1"]');
+    cell.click();
+    
+    expect(grid.getCell(1, 1).getProteinAmount('R')).toBe(50);
+  });
 });

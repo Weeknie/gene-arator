@@ -1,6 +1,9 @@
 class GridRenderer {
   constructor(container) {
     this.container = container;
+    this.selectedProtein = 'R';
+    this.injectionAmount = 100;
+    this.grid = null;
   }
 
   getCellColor(cell) {
@@ -13,6 +16,35 @@ class GridRenderer {
     }
     
     return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  enableProteinInjection(grid, proteinType = 'R', amount = 100) {
+    this.grid = grid;
+    this.selectedProtein = proteinType;
+    this.injectionAmount = amount;
+    
+    // Add click handlers to all cells
+    const cells = this.container.querySelectorAll('.grid-cell');
+    cells.forEach(cellElement => {
+      cellElement.addEventListener('click', (e) => {
+        const x = parseInt(e.target.dataset.x);
+        const y = parseInt(e.target.dataset.y);
+        const cell = this.grid.getCell(x, y);
+        cell.addProtein(this.selectedProtein, this.injectionAmount);
+        
+        // Re-render to show color change
+        this.render(this.grid);
+        this.enableProteinInjection(this.grid, this.selectedProtein, this.injectionAmount);
+      });
+    });
+  }
+
+  setSelectedProtein(proteinType) {
+    this.selectedProtein = proteinType;
+  }
+
+  setInjectionAmount(amount) {
+    this.injectionAmount = amount;
   }
 
   render(grid) {
