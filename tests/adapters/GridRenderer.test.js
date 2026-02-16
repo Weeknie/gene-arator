@@ -227,7 +227,7 @@ describe('GridRenderer', () => {
       // Expected: rgb(255, 245, 245) or similar
       const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
       expect(match).toBeTruthy();
-      const [_, r, g, b] = match.map(Number);
+      const [, r, g, b] = match.map(Number);
       
       expect(r).toBe(255); // Red channel should be full
       expect(g).toBeGreaterThan(200); // Green should be high (close to white)
@@ -265,7 +265,7 @@ describe('GridRenderer', () => {
       // Expected: high R, high G, lower B
       const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
       expect(match).toBeTruthy();
-      const [_, r, g, b] = match.map(Number);
+      const [, r, g, b] = match.map(Number);
       
       expect(r).toBeGreaterThan(200); // Red should be high
       expect(g).toBeGreaterThan(200); // Green should be high
@@ -292,7 +292,7 @@ describe('GridRenderer', () => {
       // Hmm, this might not work... but let's see
       const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
       expect(match).toBeTruthy();
-      const [_, r, g, b] = match.map(Number);
+      const [, r, g, b] = match.map(Number);
       
       // For bright yellow, we expect high R and G, low B
       expect(r).toBeGreaterThan(200);
