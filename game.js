@@ -127,13 +127,19 @@ class GridRenderer {
   }
 
   getCellColor(cell) {
-    const r = Math.min(255, Math.floor(cell.getProteinAmount('R')));
-    const g = Math.min(255, Math.floor(cell.getProteinAmount('G')));
-    const b = Math.min(255, Math.floor(cell.getProteinAmount('B')));
+    const rProtein = Math.min(255, Math.floor(cell.getProteinAmount('R')));
+    const gProtein = Math.min(255, Math.floor(cell.getProteinAmount('G')));
+    const bProtein = Math.min(255, Math.floor(cell.getProteinAmount('B')));
     
-    if (r === 0 && g === 0 && b === 0) {
+    if (rProtein === 0 && gProtein === 0 && bProtein === 0) {
       return '';
     }
+    
+    // Colors fade to white: each protein contributes to its channel and reduces others
+    // For each channel: max of (its own protein, 255 - other proteins)
+    const r = Math.min(255, Math.max(rProtein, 255 - gProtein - bProtein));
+    const g = Math.min(255, Math.max(gProtein, 255 - rProtein - bProtein));
+    const b = Math.min(255, Math.max(bProtein, 255 - rProtein - gProtein));
     
     return `rgb(${r}, ${g}, ${b})`;
   }

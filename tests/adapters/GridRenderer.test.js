@@ -81,9 +81,10 @@ describe('GridRenderer', () => {
     const centerCell = container.querySelector('[data-x="1"][data-y="1"]');
     const bgColor = centerCell.style.backgroundColor;
     
-    // Should have red component
+    // Should have red component (light red since it fades to white)
     expect(bgColor).toContain('rgb');
-    expect(bgColor).toMatch(/rgb\((\d+),\s*0,\s*0\)/);
+    // With 100 R: rgb(255, 155, 155) - red=255, green/blue=255-100=155
+    expect(bgColor).toBe('rgb(255, 155, 155)');
   });
 
   test('should apply green color to cell with G protein', () => {
@@ -96,9 +97,10 @@ describe('GridRenderer', () => {
     const centerCell = container.querySelector('[data-x="1"][data-y="1"]');
     const bgColor = centerCell.style.backgroundColor;
     
-    // Should have green component
+    // Should have green component (light green since it fades to white)
     expect(bgColor).toContain('rgb');
-    expect(bgColor).toMatch(/rgb\(0,\s*(\d+),\s*0\)/);
+    // With 100 G: rgb(155, 255, 155) - green=255, red/blue=255-100=155
+    expect(bgColor).toBe('rgb(155, 255, 155)');
   });
 
   test('should apply blue color to cell with B protein', () => {
@@ -111,9 +113,10 @@ describe('GridRenderer', () => {
     const centerCell = container.querySelector('[data-x="1"][data-y="1"]');
     const bgColor = centerCell.style.backgroundColor;
     
-    // Should have blue component
+    // Should have blue component (light blue since it fades to white)
     expect(bgColor).toContain('rgb');
-    expect(bgColor).toMatch(/rgb\(0,\s*0,\s*(\d+)\)/);
+    // With 100 B: rgb(155, 155, 255) - blue=255, red/green=255-100=155
+    expect(bgColor).toBe('rgb(155, 155, 255)');
   });
 
   test('should mix colors for cells with multiple RGB proteins', () => {
@@ -206,5 +209,95 @@ describe('GridRenderer', () => {
     cell.click();
     
     expect(grid.getCell(1, 1).getProteinAmount('R')).toBe(50);
+  });
+
+  // TDD: New tests for color fading to white
+  describe('Color fading to white', () => {
+    test('should render cell with low red protein as light red (fading to white)', () => {
+      const grid = new Grid(3, 3);
+      grid.getCell(1, 1).addProtein('R', 10);
+      
+      const renderer = new GridRenderer(container);
+      renderer.render(grid);
+      
+      const centerCell = container.querySelector('[data-x="1"][data-y="1"]');
+      const bgColor = centerCell.style.backgroundColor;
+      
+      // With 10 red protein, should be light red: high R, high G, high B
+      // Expected: rgb(255, 245, 245) or similar
+      const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      expect(match).toBeTruthy();
+      const [_, r, g, b] = match.map(Number);
+      
+      expect(r).toBe(255); // Red channel should be full
+      expect(g).toBeGreaterThan(200); // Green should be high (close to white)
+      expect(b).toBeGreaterThan(200); // Blue should be high (close to white)
+      expect(g).toBe(245); // Specifically 255 - 10 = 245
+      expect(b).toBe(245); // Specifically 255 - 10 = 245
+    });
+
+    test('should render cell with high red protein as bright red', () => {
+      const grid = new Grid(3, 3);
+      grid.getCell(1, 1).addProtein('R', 255);
+      
+      const renderer = new GridRenderer(container);
+      renderer.render(grid);
+      
+      const centerCell = container.querySelector('[data-x="1"][data-y="1"]');
+      const bgColor = centerCell.style.backgroundColor;
+      
+      // With 255 red protein, should be bright red: rgb(255, 0, 0)
+      expect(bgColor).toBe('rgb(255, 0, 0)');
+    });
+
+    test('should render cell with equal low red and green proteins as light yellow', () => {
+      const grid = new Grid(3, 3);
+      grid.getCell(1, 1).addProtein('R', 50);
+      grid.getCell(1, 1).addProtein('G', 50);
+      
+      const renderer = new GridRenderer(container);
+      renderer.render(grid);
+      
+      const centerCell = container.querySelector('[data-x="1"][data-y="1"]');
+      const bgColor = centerCell.style.backgroundColor;
+      
+      // With 50 red and 50 green, should be light yellow
+      // Expected: high R, high G, lower B
+      const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      expect(match).toBeTruthy();
+      const [_, r, g, b] = match.map(Number);
+      
+      expect(r).toBeGreaterThan(200); // Red should be high
+      expect(g).toBeGreaterThan(200); // Green should be high
+      expect(b).toBeLessThan(200); // Blue should be lower (not white)
+      expect(r).toBe(205); // 255 - 50 = 205
+      expect(g).toBe(205); // 255 - 50 = 205  
+      expect(b).toBe(155); // 255 - 50 - 50 = 155
+    });
+
+    test('should render cell with high equal red and green proteins as bright yellow', () => {
+      const grid = new Grid(3, 3);
+      grid.getCell(1, 1).addProtein('R', 255);
+      grid.getCell(1, 1).addProtein('G', 255);
+      
+      const renderer = new GridRenderer(container);
+      renderer.render(grid);
+      
+      const centerCell = container.querySelector('[data-x="1"][data-y="1"]');
+      const bgColor = centerCell.style.backgroundColor;
+      
+      // With 255 red and 255 green, should be bright yellow
+      // Expected: rgb(255, 255, 0) 
+      // With subtractive formula: (255-255, 255-255, 255-255-255) = (0, 0, -255) → clamped to (0, 0, 0)
+      // Hmm, this might not work... but let's see
+      const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      expect(match).toBeTruthy();
+      const [_, r, g, b] = match.map(Number);
+      
+      // For bright yellow, we expect high R and G, low B
+      expect(r).toBeGreaterThan(200);
+      expect(g).toBeGreaterThan(200);
+      expect(b).toBeLessThan(50); // Should be close to 0 for yellow
+    });
   });
 });
