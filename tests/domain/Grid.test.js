@@ -62,7 +62,7 @@ describe('Grid', () => {
   });
 
   test('should diffuse proteins to neighboring cells', () => {
-    const grid = new Grid(3, 3, 0.0); // No decay to test diffusion in isolation
+    const grid = new Grid(3, 3, 0.0, 0.2); // No decay, 20% diffusion
     
     // Add protein to center cell
     grid.getCell(1, 1).addProtein('R', 100);
@@ -80,7 +80,7 @@ describe('Grid', () => {
   });
 
   test('should distribute protein evenly to all neighbors', () => {
-    const grid = new Grid(3, 3, 0.0);
+    const grid = new Grid(3, 3, 0.0, 0.2); // No decay, 20% diffusion
     
     // Add protein to center cell
     grid.getCell(1, 1).addProtein('G', 100);
@@ -99,7 +99,7 @@ describe('Grid', () => {
   });
 
   test('should handle diffusion at grid edges', () => {
-    const grid = new Grid(3, 3, 0.0);
+    const grid = new Grid(3, 3, 0.0, 0.2); // No decay, 20% diffusion
     
     // Add protein to corner cell
     grid.getCell(0, 0).addProtein('B', 100);
