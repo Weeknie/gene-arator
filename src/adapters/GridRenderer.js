@@ -23,20 +23,21 @@ class GridRenderer {
     this.selectedProtein = proteinType;
     this.injectionAmount = amount;
     
-    // Add click handlers to all cells
-    const cells = this.container.querySelectorAll('.grid-cell');
-    cells.forEach(cellElement => {
-      cellElement.addEventListener('click', (e) => {
-        const x = parseInt(e.target.dataset.x);
-        const y = parseInt(e.target.dataset.y);
-        const cell = this.grid.getCell(x, y);
-        cell.addProtein(this.selectedProtein, this.injectionAmount);
-        
-        // Re-render to show color change
-        this.render(this.grid);
-        this.enableProteinInjection(this.grid, this.selectedProtein, this.injectionAmount);
+    // Add click handler using event delegation (only once)
+    if (!this.clickHandlerAttached) {
+      this.container.addEventListener('click', (e) => {
+        if (e.target.classList.contains('grid-cell')) {
+          const x = parseInt(e.target.dataset.x);
+          const y = parseInt(e.target.dataset.y);
+          const cell = this.grid.getCell(x, y);
+          cell.addProtein(this.selectedProtein, this.injectionAmount);
+          
+          // Re-render to show color change
+          this.render(this.grid);
+        }
       });
-    });
+      this.clickHandlerAttached = true;
+    }
   }
 
   setSelectedProtein(proteinType) {

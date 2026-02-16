@@ -75,19 +75,10 @@ class Grid {
         for (const [proteinName, diffusionData] of cellDiffusion.entries()) {
           const currentAmount = cell.getProteinAmount(proteinName);
           cell.proteins.set(proteinName, currentAmount - diffusionData.outgoing);
-        }
-        
-        // Add incoming protein from neighbors
-        for (let ny = 0; ny < this.height; ny++) {
-          for (let nx = 0; nx < this.width; nx++) {
-            if (nx === x && ny === y) continue;
-            
-            const neighborDiffusion = diffusionAmounts[ny][nx];
-            for (const [proteinName, diffusionData] of neighborDiffusion.entries()) {
-              if (diffusionData.neighbors.includes(cell)) {
-                cell.addProtein(proteinName, diffusionData.perNeighbor);
-              }
-            }
+          
+          // Add to each neighbor directly
+          for (const neighbor of diffusionData.neighbors) {
+            neighbor.addProtein(proteinName, diffusionData.perNeighbor);
           }
         }
       }

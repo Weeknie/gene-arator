@@ -99,19 +99,10 @@ class Grid {
         for (const [proteinName, diffusionData] of cellDiffusion.entries()) {
           const currentAmount = cell.getProteinAmount(proteinName);
           cell.proteins.set(proteinName, currentAmount - diffusionData.outgoing);
-        }
-        
-        // Add incoming protein from neighbors
-        for (let ny = 0; ny < this.height; ny++) {
-          for (let nx = 0; nx < this.width; nx++) {
-            if (nx === x && ny === y) continue;
-            
-            const neighborDiffusion = diffusionAmounts[ny][nx];
-            for (const [proteinName, diffusionData] of neighborDiffusion.entries()) {
-              if (diffusionData.neighbors.includes(cell)) {
-                cell.addProtein(proteinName, diffusionData.perNeighbor);
-              }
-            }
+          
+          // Add to each neighbor directly
+          for (const neighbor of diffusionData.neighbors) {
+            neighbor.addProtein(proteinName, diffusionData.perNeighbor);
           }
         }
       }
@@ -152,20 +143,21 @@ class GridRenderer {
     this.selectedProtein = proteinType;
     this.injectionAmount = amount;
     
-    // Add click handlers to all cells
-    const cells = this.container.querySelectorAll('.grid-cell');
-    cells.forEach(cellElement => {
-      cellElement.addEventListener('click', (e) => {
-        const x = parseInt(e.target.dataset.x);
-        const y = parseInt(e.target.dataset.y);
-        const cell = this.grid.getCell(x, y);
-        cell.addProtein(this.selectedProtein, this.injectionAmount);
-        
-        // Re-render to show color change
-        this.render(this.grid);
-        this.enableProteinInjection(this.grid, this.selectedProtein, this.injectionAmount);
+    // Add click handler using event delegation (only once)
+    if (!this.clickHandlerAttached) {
+      this.container.addEventListener('click', (e) => {
+        if (e.target.classList.contains('grid-cell')) {
+          const x = parseInt(e.target.dataset.x);
+          const y = parseInt(e.target.dataset.y);
+          const cell = this.grid.getCell(x, y);
+          cell.addProtein(this.selectedProtein, this.injectionAmount);
+          
+          // Re-render to show color change
+          this.render(this.grid);
+        }
       });
-    });
+      this.clickHandlerAttached = true;
+    }
   }
 
   setSelectedProtein(proteinType) {
@@ -235,7 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
       intervalId = setInterval(() => {
         grid.tick();
         renderer.render(grid);
-        renderer.enableProteinInjection(grid, renderer.selectedProtein, renderer.injectionAmount);
       }, 100);
       document.getElementById('start-btn').textContent = 'Pause';
     } else {
