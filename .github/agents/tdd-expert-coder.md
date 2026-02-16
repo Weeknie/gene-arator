@@ -23,6 +23,7 @@ You MUST follow this cycle for every feature or bug fix:
 - Apply design patterns and best practices where appropriate
 - Ensure all tests still pass after refactoring
 - Remove duplication and improve naming
+- Commit the changes after refactor phase is complete
 
 ## Hexagonal Architecture Principles
 
