@@ -1,9 +1,11 @@
 const Cell = require('./Cell');
 
 class Grid {
-  constructor(width, height) {
+  constructor(width, height, decayRate = 0.1, diffusionRate = 0.2) {
     this.width = width;
     this.height = height;
+    this.decayRate = decayRate;
+    this.diffusionRate = diffusionRate;
     this.cells = [];
     
     // Initialize grid with cells
@@ -17,6 +19,77 @@ class Grid {
 
   getCell(x, y) {
     return this.cells[y][x];
+  }
+
+  getNeighbors(x, y) {
+    const neighbors = [];
+    
+    // Top
+    if (y > 0) neighbors.push(this.cells[y - 1][x]);
+    // Bottom
+    if (y < this.height - 1) neighbors.push(this.cells[y + 1][x]);
+    // Left
+    if (x > 0) neighbors.push(this.cells[y][x - 1]);
+    // Right
+    if (x < this.width - 1) neighbors.push(this.cells[y][x + 1]);
+    
+    return neighbors;
+  }
+
+  tick() {
+    // Calculate diffusion amounts for all cells first
+    const diffusionAmounts = [];
+    
+    for (let y = 0; y < this.height; y++) {
+      diffusionAmounts[y] = [];
+      for (let x = 0; x < this.width; x++) {
+        const cell = this.cells[y][x];
+        const neighbors = this.getNeighbors(x, y);
+        const cellDiffusion = new Map();
+        
+        // For each protein in this cell
+        for (const [proteinName, amount] of cell.proteins.entries()) {
+          if (amount > 0 && neighbors.length > 0) {
+            const amountToDiffuse = amount * this.diffusionRate;
+            const amountPerNeighbor = amountToDiffuse / neighbors.length;
+            
+            cellDiffusion.set(proteinName, {
+              outgoing: amountToDiffuse,
+              perNeighbor: amountPerNeighbor,
+              neighbors: neighbors
+            });
+          }
+        }
+        
+        diffusionAmounts[y][x] = cellDiffusion;
+      }
+    }
+    
+    // Apply diffusion
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        const cell = this.cells[y][x];
+        const cellDiffusion = diffusionAmounts[y][x];
+        
+        // Remove outgoing protein
+        for (const [proteinName, diffusionData] of cellDiffusion.entries()) {
+          const currentAmount = cell.getProteinAmount(proteinName);
+          cell.proteins.set(proteinName, currentAmount - diffusionData.outgoing);
+          
+          // Add to each neighbor directly
+          for (const neighbor of diffusionData.neighbors) {
+            neighbor.addProtein(proteinName, diffusionData.perNeighbor);
+          }
+        }
+      }
+    }
+    
+    // Apply decay to all cells
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        this.cells[y][x].decay(this.decayRate);
+      }
+    }
   }
 }
 

@@ -42,8 +42,8 @@ h1 {
 }
 
 .grid-cell {
-    width: 40px;
-    height: 40px;
+    width: 25px;
+    height: 25px;
     border: 1px solid #ccc;
     background-color: #fff;
     transition: background-color 0.2s;
