@@ -126,16 +126,86 @@ class GridRenderer {
     this.grid = null;
   }
 
+  /**
+   * Convert cell protein amounts to HSL color.
+   * 
+   * This method implements an HSL-based coloring algorithm that:
+   * 1. Scales RGB protein values so max = 255
+   * 2. Converts to HSL color space
+   * 3. Adjusts lightness based on scaling factor
+   * 4. Returns HSL string suitable for CSS
+   * 
+   * Note: This method is duplicated from src/adapters/GridRenderer.js
+   * for browser compatibility (game.js doesn't use module imports).
+   * Any changes to GridRenderer.js must be reflected here.
+   * 
+   * @param {Cell} cell - The cell to get color for
+   * @returns {string} HSL color string (e.g., "hsl(0, 100%, 50%)")
+   */
   getCellColor(cell) {
-    const r = Math.min(255, Math.floor(cell.getProteinAmount('R')));
-    const g = Math.min(255, Math.floor(cell.getProteinAmount('G')));
-    const b = Math.min(255, Math.floor(cell.getProteinAmount('B')));
+    // Get R, G, B protein amounts (no capping at 255)
+    const r = Math.floor(cell.getProteinAmount('R'));
+    const g = Math.floor(cell.getProteinAmount('G'));
+    const b = Math.floor(cell.getProteinAmount('B'));
     
-    if (r === 0 && g === 0 && b === 0) {
-      return '';
+    // Find max
+    const max = Math.max(r, g, b);
+    
+    // If max === 0, return white
+    if (max === 0) {
+      return 'hsl(0, 0%, 100%)';
     }
     
-    return `rgb(${r}, ${g}, ${b})`;
+    // Compute scaling factor
+    const s = 255 / max;
+    
+    // Scale RGB values
+    const scaledR = r * s;
+    const scaledG = g * s;
+    const scaledB = b * s;
+    
+    // Convert scaled RGB [0-255] to HSL
+    // Normalize
+    const rN = scaledR / 255;
+    const gN = scaledG / 255;
+    const bN = scaledB / 255;
+    
+    const maxN = Math.max(rN, gN, bN);
+    const minN = Math.min(rN, gN, bN);
+    const delta = maxN - minN;
+    
+    // Lightness
+    const L = (maxN + minN) / 2;
+    
+    let H = 0;
+    let S = 0;
+    
+    if (delta !== 0) {
+      // Saturation
+      S = delta / (1 - Math.abs(2 * L - 1));
+      
+      // Hue based on which channel is max
+      // Use scaled values to avoid floating-point precision issues
+      const maxScaled = Math.max(scaledR, scaledG, scaledB);
+      if (scaledR === maxScaled) {
+        H = (((gN - bN) / delta) % 6) * 60;
+        // Wrap negative to positive
+        if (H < 0) H += 360;
+      } else if (scaledG === maxScaled) {
+        H = ((bN - rN) / delta + 2) * 60;
+      } else if (scaledB === maxScaled) {
+        H = ((rN - gN) / delta + 4) * 60;
+      }
+    }
+    
+    // Compute final lightness
+    let finalL = 1 - (1 - L) / s;
+    
+    // Clamp finalL to valid range [0, 1] to handle edge cases
+    finalL = Math.max(0, Math.min(1, finalL));
+    
+    // Return HSL string
+    return `hsl(${Math.round(H)}, ${Math.round(S * 100)}%, ${Math.round(finalL * 100)}%)`;
   }
 
   enableProteinInjection(grid, proteinType = 'R', amount = 100) {
