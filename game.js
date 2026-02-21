@@ -647,6 +647,8 @@ function createControls(renderer, grid) {
   errorMessageDiv.style.fontSize = '12px';
   errorMessageDiv.style.marginTop = '5px';
   errorMessageDiv.style.display = 'none';
+  errorMessageDiv.setAttribute('role', 'alert');
+  errorMessageDiv.setAttribute('aria-live', 'polite');
   codeDiv.appendChild(errorMessageDiv);
   
   const applyCodeBtn = document.createElement('button');
@@ -655,8 +657,8 @@ function createControls(renderer, grid) {
   applyCodeBtn.style.cursor = 'pointer';
   applyCodeBtn.addEventListener('click', () => {
     try {
-      errorMessageDiv.style.display = 'none';
       errorMessageDiv.textContent = '';
+      errorMessageDiv.style.display = 'none';
       renderer.grid.setGeneticCode(new GeneticCode(codeTextarea.value));
     } catch (error) {
       errorMessageDiv.textContent = error.message;
