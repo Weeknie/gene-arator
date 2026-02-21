@@ -220,4 +220,86 @@ describe('Grid', () => {
       }
     }
   });
+
+  test('should apply conditional gene when condition is satisfied', () => {
+    const grid = new Grid(2, 2, 0.0, 0.0); // No decay, no diffusion
+    const geneticCode = new GeneticCode('(A>20)->R+10');
+    grid.setGeneticCode(geneticCode);
+    
+    // Set up cell with protein A > 20
+    grid.getCell(0, 0).addProtein('A', 30);
+    // Set up cell with protein A <= 20
+    grid.getCell(1, 0).addProtein('A', 15);
+    
+    grid.tick();
+    
+    // Cell with A=30 should produce R+10
+    expect(grid.getCell(0, 0).getProteinAmount('R')).toBe(10);
+    // Cell with A=15 should NOT produce R
+    expect(grid.getCell(1, 0).getProteinAmount('R')).toBe(0);
+  });
+
+  test('should NOT apply conditional gene when condition is not satisfied', () => {
+    const grid = new Grid(2, 2, 0.0, 0.0); // No decay, no diffusion
+    const geneticCode = new GeneticCode('(A<10)->G+5');
+    grid.setGeneticCode(geneticCode);
+    
+    // Set up cell with protein A >= 10 (condition not met)
+    grid.getCell(0, 0).addProtein('A', 15);
+    
+    grid.tick();
+    
+    // Cell should NOT produce G since A is not < 10
+    expect(grid.getCell(0, 0).getProteinAmount('G')).toBe(0);
+  });
+
+  test('should apply chained conditional gene only when ALL conditions are met', () => {
+    const grid = new Grid(3, 3, 0.0, 0.0); // No decay, no diffusion
+    const geneticCode = new GeneticCode('(A>10)->(B>20)->R+2');
+    grid.setGeneticCode(geneticCode);
+    
+    // Cell (0,0): both conditions met (A>10 AND B>20)
+    grid.getCell(0, 0).addProtein('A', 15);
+    grid.getCell(0, 0).addProtein('B', 25);
+    
+    // Cell (1,0): only first condition met (A>10 but B<=20)
+    grid.getCell(1, 0).addProtein('A', 15);
+    grid.getCell(1, 0).addProtein('B', 15);
+    
+    // Cell (2,0): only second condition met (A<=10 but B>20)
+    grid.getCell(2, 0).addProtein('A', 5);
+    grid.getCell(2, 0).addProtein('B', 25);
+    
+    grid.tick();
+    
+    // Only cell (0,0) should produce R+2
+    expect(grid.getCell(0, 0).getProteinAmount('R')).toBe(2);
+    expect(grid.getCell(1, 0).getProteinAmount('R')).toBe(0);
+    expect(grid.getCell(2, 0).getProteinAmount('R')).toBe(0);
+  });
+
+  test('should support different comparison operators in conditional genes', () => {
+    const grid = new Grid(4, 1, 0.0, 0.0); // No decay, no diffusion
+    const geneticCode = new GeneticCode('(A>=10)->R+1;(B<=5)->G+1;(C<20)->B+1');
+    grid.setGeneticCode(geneticCode);
+    
+    // Cell 0: A=10 (should satisfy A>=10)
+    grid.getCell(0, 0).addProtein('A', 10);
+    
+    // Cell 1: B=5 (should satisfy B<=5)
+    grid.getCell(1, 0).addProtein('B', 5);
+    
+    // Cell 2: C=19 (should satisfy C<20)
+    grid.getCell(2, 0).addProtein('C', 19);
+    
+    // Cell 3: C=20 (should NOT satisfy C<20)
+    grid.getCell(3, 0).addProtein('C', 20);
+    
+    grid.tick();
+    
+    expect(grid.getCell(0, 0).getProteinAmount('R')).toBe(1);
+    expect(grid.getCell(1, 0).getProteinAmount('G')).toBe(1);
+    expect(grid.getCell(2, 0).getProteinAmount('B')).toBe(1);
+    expect(grid.getCell(3, 0).getProteinAmount('B')).toBe(0);
+  });
 });

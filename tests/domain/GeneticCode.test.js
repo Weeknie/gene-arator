@@ -67,4 +67,73 @@ describe('GeneticCode', () => {
     expect(geneticCode.genes.get('G')).toBe(5);
     expect(geneticCode.genes.get('B')).toBe(2.5);
   });
+
+  test('should parse simple conditional expression with single condition', () => {
+    const geneticCode = new GeneticCode('(A>20)->R+10');
+    
+    expect(geneticCode.conditionalGenes).toBeDefined();
+    expect(geneticCode.conditionalGenes.length).toBe(1);
+    
+    const conditional = geneticCode.conditionalGenes[0];
+    expect(conditional.conditions.length).toBe(1);
+    expect(conditional.conditions[0].protein).toBe('A');
+    expect(conditional.conditions[0].operator).toBe('>');
+    expect(conditional.conditions[0].threshold).toBe(20);
+    expect(conditional.proteinName).toBe('R');
+    expect(conditional.productionRate).toBe(10);
+  });
+
+  test('should parse chained conditional expression with multiple conditions', () => {
+    const geneticCode = new GeneticCode('(A>10)->(B>20)->R+2');
+    
+    expect(geneticCode.conditionalGenes).toBeDefined();
+    expect(geneticCode.conditionalGenes.length).toBe(1);
+    
+    const conditional = geneticCode.conditionalGenes[0];
+    expect(conditional.conditions.length).toBe(2);
+    expect(conditional.conditions[0].protein).toBe('A');
+    expect(conditional.conditions[0].operator).toBe('>');
+    expect(conditional.conditions[0].threshold).toBe(10);
+    expect(conditional.conditions[1].protein).toBe('B');
+    expect(conditional.conditions[1].operator).toBe('>');
+    expect(conditional.conditions[1].threshold).toBe(20);
+    expect(conditional.proteinName).toBe('R');
+    expect(conditional.productionRate).toBe(2);
+  });
+
+  test('should parse mixed code with both unconditional and conditional genes', () => {
+    const geneticCode = new GeneticCode('R+5;(A>20)->G+10');
+    
+    // Unconditional gene
+    expect(geneticCode.genes.size).toBe(1);
+    expect(geneticCode.genes.get('R')).toBe(5);
+    
+    // Conditional gene
+    expect(geneticCode.conditionalGenes.length).toBe(1);
+    const conditional = geneticCode.conditionalGenes[0];
+    expect(conditional.conditions.length).toBe(1);
+    expect(conditional.conditions[0].protein).toBe('A');
+    expect(conditional.conditions[0].operator).toBe('>');
+    expect(conditional.conditions[0].threshold).toBe(20);
+    expect(conditional.proteinName).toBe('G');
+    expect(conditional.productionRate).toBe(10);
+  });
+
+  test('should parse conditional expressions with different operators', () => {
+    const geneticCode = new GeneticCode('(A>=10)->R+1;(B<=5)->G+2;(C<20)->B+3');
+    
+    expect(geneticCode.conditionalGenes.length).toBe(3);
+    
+    // First conditional: A>=10
+    expect(geneticCode.conditionalGenes[0].conditions[0].operator).toBe('>=');
+    expect(geneticCode.conditionalGenes[0].conditions[0].threshold).toBe(10);
+    
+    // Second conditional: B<=5
+    expect(geneticCode.conditionalGenes[1].conditions[0].operator).toBe('<=');
+    expect(geneticCode.conditionalGenes[1].conditions[0].threshold).toBe(5);
+    
+    // Third conditional: C<20
+    expect(geneticCode.conditionalGenes[2].conditions[0].operator).toBe('<');
+    expect(geneticCode.conditionalGenes[2].conditions[0].threshold).toBe(20);
+  });
 });

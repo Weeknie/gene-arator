@@ -54,6 +54,20 @@ class Grid {
       }
     }
 
+    // Apply conditional genes
+    if (this.geneticCode && this.geneticCode.conditionalGenes.length > 0) {
+      for (let y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+          const cell = this.cells[y][x];
+          for (const conditionalGene of this.geneticCode.conditionalGenes) {
+            if (this._evaluateConditions(cell, conditionalGene.conditions)) {
+              cell.addProtein(conditionalGene.proteinName, conditionalGene.productionRate);
+            }
+          }
+        }
+      }
+    }
+
     // Calculate diffusion amounts for all cells first
     const diffusionAmounts = [];
     
@@ -108,6 +122,34 @@ class Grid {
         this.cells[y][x].decay(this.decayRate);
       }
     }
+  }
+
+  _evaluateConditions(cell, conditions) {
+    for (const condition of conditions) {
+      const proteinAmount = cell.getProteinAmount(condition.protein);
+      
+      let conditionMet = false;
+      switch (condition.operator) {
+        case '>':
+          conditionMet = proteinAmount > condition.threshold;
+          break;
+        case '<':
+          conditionMet = proteinAmount < condition.threshold;
+          break;
+        case '>=':
+          conditionMet = proteinAmount >= condition.threshold;
+          break;
+        case '<=':
+          conditionMet = proteinAmount <= condition.threshold;
+          break;
+      }
+      
+      if (!conditionMet) {
+        return false;
+      }
+    }
+    
+    return true;
   }
 }
 
