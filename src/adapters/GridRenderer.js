@@ -15,9 +15,6 @@ class GridRenderer {
    * 3. Adjusts lightness based on scaling factor
    * 4. Returns HSL string suitable for CSS
    * 
-   * Note: This method is duplicated in game.js for browser compatibility.
-   * Any changes here must be reflected in game.js.
-   * 
    * @param {Cell} cell - The cell to get color for
    * @returns {string} HSL color string (e.g., "hsl(0, 100%, 50%)")
    */
@@ -153,4 +150,5 @@ class GridRenderer {
   }
 }
 
-module.exports = GridRenderer;
+if (typeof module !== 'undefined') module.exports = GridRenderer;
+if (typeof window !== 'undefined') window.GridRenderer = GridRenderer;

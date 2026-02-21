@@ -127,4 +127,5 @@ class SettingsMenu {
   }
 }
 
-module.exports = SettingsMenu;
+if (typeof module !== 'undefined') module.exports = SettingsMenu;
+if (typeof window !== 'undefined') window.SettingsMenu = SettingsMenu;
