@@ -1,6 +1,7 @@
 /* global GeneticCode */
-(function () {
-const GeneticCode = typeof module !== 'undefined' ? require('../domain/GeneticCode') : window.GeneticCode;
+if (typeof module !== 'undefined') {
+  var GeneticCode = require('../domain/GeneticCode');
+}
 
 function createControls(renderer, grid) {
   const controlsDiv = document.createElement('div');
@@ -137,4 +138,3 @@ function createControls(renderer, grid) {
 
 if (typeof module !== 'undefined') module.exports = createControls;
 if (typeof window !== 'undefined') window.createControls = createControls;
-}());

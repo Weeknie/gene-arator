@@ -1,6 +1,7 @@
 /* global Cell */
-(function () {
-const Cell = typeof module !== 'undefined' ? require('./Cell') : window.Cell;
+if (typeof module !== 'undefined') {
+  var Cell = require('./Cell');
+}
 
 class Grid {
   constructor(width, height, decayRate = 0.1, diffusionRate = 0.2) {
@@ -143,4 +144,3 @@ class Grid {
 
 if (typeof module !== 'undefined') module.exports = Grid;
 if (typeof window !== 'undefined') window.Grid = Grid;
-}());
