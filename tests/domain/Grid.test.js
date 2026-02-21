@@ -266,13 +266,13 @@ describe('Grid', () => {
     expect(cell.getProteinAmount('R')).toBe(0);
     
     // Case 2: Only second condition met
-    cell.proteins.clear();
+    cell.clearProteins();
     cell.addProtein('B', 25);
     grid.tick();
     expect(cell.getProteinAmount('R')).toBe(0);
     
     // Case 3: Both conditions met
-    cell.proteins.clear();
+    cell.clearProteins();
     cell.addProtein('A', 15);
     cell.addProtein('B', 25);
     grid.tick();

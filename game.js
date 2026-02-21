@@ -131,6 +131,10 @@ class Cell {
     return this.proteins.get(proteinName) || 0;
   }
 
+  clearProteins() {
+    this.proteins.clear();
+  }
+
   decay(decayRate) {
     for (const [proteinName, amount] of this.proteins.entries()) {
       const newAmount = Math.max(0, amount * (1 - decayRate));
