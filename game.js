@@ -648,7 +648,7 @@ function createControls(renderer, grid) {
   errorMessageDiv.style.marginTop = '5px';
   errorMessageDiv.style.display = 'none';
   errorMessageDiv.setAttribute('role', 'alert');
-  errorMessageDiv.setAttribute('aria-live', 'polite');
+  errorMessageDiv.setAttribute('aria-live', 'assertive');
   codeDiv.appendChild(errorMessageDiv);
   
   const applyCodeBtn = document.createElement('button');
