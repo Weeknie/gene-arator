@@ -16,6 +16,7 @@ body {
 
 .container {
     text-align: center;
+    position: relative;
 }
 
 h1 {
@@ -52,4 +53,85 @@ h1 {
 .grid-cell:hover {
     background-color: #e0e0e0;
     cursor: pointer;
+}
+
+/* Settings Menu Styles */
+.settings-wrapper {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.settings-btn {
+    background-color: #fff;
+    border: 2px solid #333;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.settings-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.settings-btn:active {
+    transform: scale(0.95);
+}
+
+.settings-panel {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background-color: #fff;
+    border: 2px solid #333;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    min-width: 220px;
+    z-index: 1000;
+}
+
+.settings-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.settings-field label {
+    font-size: 0.9rem;
+    color: #333;
+    margin-right: 10px;
+}
+
+.settings-field input {
+    width: 80px;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.settings-apply-btn {
+    width: 100%;
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.settings-apply-btn:hover {
+    background-color: #45a049;
+}
+
+.settings-apply-btn:active {
+    background-color: #3d8b40;
 }
