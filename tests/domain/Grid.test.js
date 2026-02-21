@@ -115,6 +115,24 @@ describe('Grid', () => {
     expect(grid.getCell(0, 0).getProteinAmount('B')).toBeGreaterThan(0);
   });
 
+  test('should diffuse edge cells as if fully surrounded by 4 neighbors, discarding out-of-bounds protein', () => {
+    const grid = new Grid(3, 3, 0.0, 0.2); // No decay, 20% diffusion
+    
+    // Add protein to corner cell (0,0) - has only 2 real neighbors
+    grid.getCell(0, 0).addProtein('R', 100);
+    
+    grid.tick();
+    
+    // Corner cell always loses 20% (amountToDiffuse = 20)
+    expect(grid.getCell(0, 0).getProteinAmount('R')).toBeCloseTo(80);
+    
+    // Each real neighbor gets 20/4 = 5 (not 20/2 = 10)
+    expect(grid.getCell(1, 0).getProteinAmount('R')).toBeCloseTo(5);
+    expect(grid.getCell(0, 1).getProteinAmount('R')).toBeCloseTo(5);
+    
+    // The remaining 10 (2 out-of-bounds directions) is discarded
+  });
+
   test('should apply both decay and diffusion in same tick', () => {
     const grid = new Grid(3, 3, 0.1); // 10% decay
     
