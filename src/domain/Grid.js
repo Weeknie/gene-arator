@@ -6,6 +6,7 @@ class Grid {
     this.height = height;
     this.decayRate = decayRate;
     this.diffusionRate = diffusionRate;
+    this.geneticCode = null;
     this.cells = [];
     
     // Initialize grid with cells
@@ -36,7 +37,23 @@ class Grid {
     return neighbors;
   }
 
+  setGeneticCode(geneticCode) {
+    this.geneticCode = geneticCode;
+  }
+
   tick() {
+    // Apply genetic code production first (before diffusion)
+    if (this.geneticCode && this.geneticCode.genes.size > 0) {
+      for (let y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+          const cell = this.cells[y][x];
+          for (const [proteinName, productionRate] of this.geneticCode.genes.entries()) {
+            cell.addProtein(proteinName, productionRate);
+          }
+        }
+      }
+    }
+
     // Calculate diffusion amounts for all cells first
     const diffusionAmounts = [];
     

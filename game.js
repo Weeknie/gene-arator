@@ -1,3 +1,48 @@
+// GeneticCode class
+class GeneticCode {
+  constructor(code) {
+    this.genes = new Map();
+    this._parse(code);
+  }
+
+  _parse(code) {
+    // Handle empty or whitespace-only strings
+    if (!code || code.trim() === '') {
+      return;
+    }
+
+    // Split by semicolon
+    const tokens = code.split(';');
+
+    for (const token of tokens) {
+      const trimmedToken = token.trim();
+      
+      // Skip empty tokens
+      if (trimmedToken === '') {
+        continue;
+      }
+
+      // Parse token in format "ProteinName+ProductionRate"
+      const parts = trimmedToken.split('+');
+      
+      // Skip invalid tokens (must have exactly 2 parts)
+      if (parts.length !== 2) {
+        continue;
+      }
+
+      const proteinName = parts[0].trim();
+      const productionRate = parseFloat(parts[1].trim());
+
+      // Skip if protein name is empty or production rate is invalid
+      if (proteinName === '' || isNaN(productionRate)) {
+        continue;
+      }
+
+      this.genes.set(proteinName, productionRate);
+    }
+  }
+}
+
 // Cell class
 class Cell {
   constructor(x, y) {
@@ -30,6 +75,7 @@ class Grid {
     this.height = height;
     this.decayRate = decayRate;
     this.diffusionRate = diffusionRate;
+    this.geneticCode = null;
     this.cells = [];
     
     // Initialize grid with cells
@@ -60,7 +106,23 @@ class Grid {
     return neighbors;
   }
 
+  setGeneticCode(geneticCode) {
+    this.geneticCode = geneticCode;
+  }
+
   tick() {
+    // Apply genetic code production first (before diffusion)
+    if (this.geneticCode && this.geneticCode.genes.size > 0) {
+      for (let y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+          const cell = this.cells[y][x];
+          for (const [proteinName, productionRate] of this.geneticCode.genes.entries()) {
+            cell.addProtein(proteinName, productionRate);
+          }
+        }
+      }
+    }
+
     // Calculate diffusion amounts for all cells first
     const diffusionAmounts = [];
     
@@ -326,6 +388,22 @@ class SettingsMenu {
       0.01
     );
 
+    // Genetic code textarea
+    const geneticCodeField = document.createElement('div');
+    geneticCodeField.className = 'settings-field';
+
+    const geneticCodeLabel = document.createElement('label');
+    geneticCodeLabel.textContent = 'Genetic Code';
+    geneticCodeLabel.htmlFor = 'settings-genetic-code';
+
+    const geneticCodeTextarea = document.createElement('textarea');
+    geneticCodeTextarea.id = 'settings-genetic-code';
+    geneticCodeTextarea.rows = 4;
+    geneticCodeTextarea.value = currentSettings.geneticCode || '';
+
+    geneticCodeField.appendChild(geneticCodeLabel);
+    geneticCodeField.appendChild(geneticCodeTextarea);
+
     // Apply button
     const applyButton = document.createElement('button');
     applyButton.className = 'settings-apply-btn';
@@ -334,11 +412,13 @@ class SettingsMenu {
       const gridSizeInput = panel.querySelector('#settings-grid-size');
       const diffusionRateInput = panel.querySelector('#settings-diffusion-rate');
       const decayRateInput = panel.querySelector('#settings-decay-rate');
+      const geneticCodeTextarea = panel.querySelector('#settings-genetic-code');
 
       const newSettings = {
         gridSize: Number(gridSizeInput.value),
         diffusionRate: Number(diffusionRateInput.value),
-        decayRate: Number(decayRateInput.value)
+        decayRate: Number(decayRateInput.value),
+        geneticCode: geneticCodeTextarea.value
       };
 
       this.onApply(newSettings);
@@ -349,6 +429,7 @@ class SettingsMenu {
     panel.appendChild(gridSizeField);
     panel.appendChild(diffusionRateField);
     panel.appendChild(decayRateField);
+    panel.appendChild(geneticCodeField);
     panel.appendChild(applyButton);
 
     // Append button and panel to wrapper
@@ -410,9 +491,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const DEFAULT_GRID_SIZE = 20;
   const DEFAULT_DIFFUSION_RATE = 0.2;
   const DEFAULT_DECAY_RATE = 0.1;
+  const DEFAULT_GENETIC_CODE = '';
   
   const container = document.getElementById('game-container');
   let grid = new Grid(DEFAULT_GRID_SIZE, DEFAULT_GRID_SIZE, DEFAULT_DECAY_RATE, DEFAULT_DIFFUSION_RATE);
+  grid.setGeneticCode(new GeneticCode(DEFAULT_GENETIC_CODE));
   const renderer = new GridRenderer(container);
   
   // Initial render
@@ -461,6 +544,9 @@ document.addEventListener('DOMContentLoaded', () => {
       newSettings.diffusionRate
     );
     
+    // Set genetic code on the new grid
+    grid.setGeneticCode(new GeneticCode(newSettings.geneticCode || ''));
+    
     // Re-render
     renderer.render(grid);
     
@@ -472,7 +558,8 @@ document.addEventListener('DOMContentLoaded', () => {
   settingsMenu.render({
     gridSize: DEFAULT_GRID_SIZE,
     diffusionRate: DEFAULT_DIFFUSION_RATE,
-    decayRate: DEFAULT_DECAY_RATE
+    decayRate: DEFAULT_DECAY_RATE,
+    geneticCode: DEFAULT_GENETIC_CODE
   });
 });
 

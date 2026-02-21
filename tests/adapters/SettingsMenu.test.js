@@ -22,7 +22,7 @@ describe('SettingsMenu', () => {
 
   test('should render a settings button with class settings-btn', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
-    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: '' });
     
     const button = container.querySelector('.settings-btn');
     expect(button).toBeTruthy();
@@ -30,7 +30,7 @@ describe('SettingsMenu', () => {
 
   test('should render a hidden settings panel with class settings-panel', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
-    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: '' });
     
     const panel = container.querySelector('.settings-panel');
     expect(panel).toBeTruthy();
@@ -39,7 +39,7 @@ describe('SettingsMenu', () => {
 
   test('should show panel when button is clicked', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
-    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: '' });
     
     const button = container.querySelector('.settings-btn');
     const panel = container.querySelector('.settings-panel');
@@ -51,7 +51,7 @@ describe('SettingsMenu', () => {
 
   test('should hide panel when button is clicked again (toggle)', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
-    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: '' });
     
     const button = container.querySelector('.settings-btn');
     const panel = container.querySelector('.settings-panel');
@@ -65,7 +65,7 @@ describe('SettingsMenu', () => {
 
   test('should render grid size input with id settings-grid-size', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
-    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: '' });
     
     const input = container.querySelector('#settings-grid-size');
     expect(input).toBeTruthy();
@@ -74,7 +74,7 @@ describe('SettingsMenu', () => {
 
   test('should render diffusion rate input with id settings-diffusion-rate', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
-    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: '' });
     
     const input = container.querySelector('#settings-diffusion-rate');
     expect(input).toBeTruthy();
@@ -83,38 +83,59 @@ describe('SettingsMenu', () => {
 
   test('should render decay rate input with id settings-decay-rate', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
-    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: '' });
     
     const input = container.querySelector('#settings-decay-rate');
     expect(input).toBeTruthy();
     expect(input.value).toBe('0.1');
   });
 
+  test('should render genetic code textarea with id settings-genetic-code', () => {
+    const settingsMenu = new SettingsMenu(container, onApply);
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: '' });
+    
+    const textarea = container.querySelector('#settings-genetic-code');
+    expect(textarea).toBeTruthy();
+    expect(textarea.tagName).toBe('TEXTAREA');
+    expect(textarea.rows).toBeGreaterThan(1);
+  });
+
+  test('should display current genetic code in textarea', () => {
+    const settingsMenu = new SettingsMenu(container, onApply);
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: 'A+2;B+0.5' });
+    
+    const textarea = container.querySelector('#settings-genetic-code');
+    expect(textarea.value).toBe('A+2;B+0.5');
+  });
+
   test('should call onApply with correct parsed values when apply button is clicked', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
-    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: '' });
     
     const gridSizeInput = container.querySelector('#settings-grid-size');
     const diffusionRateInput = container.querySelector('#settings-diffusion-rate');
     const decayRateInput = container.querySelector('#settings-decay-rate');
+    const geneticCodeTextarea = container.querySelector('#settings-genetic-code');
     const applyButton = container.querySelector('.settings-apply-btn');
     
     gridSizeInput.value = '30';
     diffusionRateInput.value = '0.3';
     decayRateInput.value = '0.15';
+    geneticCodeTextarea.value = 'R+10;G+5';
     
     applyButton.click();
     
     expect(onApply).toHaveBeenCalledWith({
       gridSize: 30,
       diffusionRate: 0.3,
-      decayRate: 0.15
+      decayRate: 0.15,
+      geneticCode: 'R+10;G+5'
     });
   });
 
   test('should close panel after apply button is clicked', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
-    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: '' });
     
     const button = container.querySelector('.settings-btn');
     const panel = container.querySelector('.settings-panel');
@@ -129,7 +150,7 @@ describe('SettingsMenu', () => {
 
   test('should open panel when open method is called', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
-    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: '' });
     
     const panel = container.querySelector('.settings-panel');
     
@@ -141,7 +162,7 @@ describe('SettingsMenu', () => {
 
   test('should close panel when close method is called', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
-    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: '' });
     
     const panel = container.querySelector('.settings-panel');
     
@@ -155,7 +176,7 @@ describe('SettingsMenu', () => {
 
   test('should toggle panel state when toggle method is called', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
-    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1, geneticCode: '' });
     
     const panel = container.querySelector('.settings-panel');
     

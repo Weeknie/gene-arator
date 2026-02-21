@@ -49,6 +49,22 @@ class SettingsMenu {
       0.01
     );
 
+    // Genetic code textarea
+    const geneticCodeField = document.createElement('div');
+    geneticCodeField.className = 'settings-field';
+
+    const geneticCodeLabel = document.createElement('label');
+    geneticCodeLabel.textContent = 'Genetic Code';
+    geneticCodeLabel.htmlFor = 'settings-genetic-code';
+
+    const geneticCodeTextarea = document.createElement('textarea');
+    geneticCodeTextarea.id = 'settings-genetic-code';
+    geneticCodeTextarea.rows = 4;
+    geneticCodeTextarea.value = currentSettings.geneticCode || '';
+
+    geneticCodeField.appendChild(geneticCodeLabel);
+    geneticCodeField.appendChild(geneticCodeTextarea);
+
     // Apply button
     const applyButton = document.createElement('button');
     applyButton.className = 'settings-apply-btn';
@@ -57,11 +73,13 @@ class SettingsMenu {
       const gridSizeInput = panel.querySelector('#settings-grid-size');
       const diffusionRateInput = panel.querySelector('#settings-diffusion-rate');
       const decayRateInput = panel.querySelector('#settings-decay-rate');
+      const geneticCodeTextarea = panel.querySelector('#settings-genetic-code');
 
       const newSettings = {
         gridSize: Number(gridSizeInput.value),
         diffusionRate: Number(diffusionRateInput.value),
-        decayRate: Number(decayRateInput.value)
+        decayRate: Number(decayRateInput.value),
+        geneticCode: geneticCodeTextarea.value
       };
 
       this.onApply(newSettings);
@@ -72,6 +90,7 @@ class SettingsMenu {
     panel.appendChild(gridSizeField);
     panel.appendChild(diffusionRateField);
     panel.appendChild(decayRateField);
+    panel.appendChild(geneticCodeField);
     panel.appendChild(applyButton);
 
     // Append button and panel to wrapper
