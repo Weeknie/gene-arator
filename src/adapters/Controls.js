@@ -1,4 +1,5 @@
 /* global GeneticCode */
+(function () {
 const GeneticCode = typeof module !== 'undefined' ? require('../domain/GeneticCode') : window.GeneticCode;
 
 function createControls(renderer, grid) {
@@ -84,6 +85,10 @@ function createControls(renderer, grid) {
   codeTextarea.rows = 3;
   codeTextarea.style.width = '200px';
   codeTextarea.placeholder = 'e.g. R+10;G+5';
+  const savedCode = typeof localStorage !== 'undefined' ? localStorage.getItem('geneticCode') : null;
+  if (savedCode) {
+    codeTextarea.value = savedCode;
+  }
   codeDiv.appendChild(codeTextarea);
   
   const errorMessageDiv = document.createElement('div');
@@ -104,12 +109,26 @@ function createControls(renderer, grid) {
       errorMessageDiv.textContent = '';
       errorMessageDiv.style.display = 'none';
       renderer.grid.setGeneticCode(new GeneticCode(codeTextarea.value));
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('geneticCode', codeTextarea.value);
+      }
     } catch (error) {
       errorMessageDiv.textContent = error.message;
       errorMessageDiv.style.display = 'block';
     }
   });
   codeDiv.appendChild(applyCodeBtn);
+  
+  const clearBtn = document.createElement('button');
+  clearBtn.id = 'clear-btn';
+  clearBtn.textContent = 'Clear';
+  clearBtn.style.padding = '6px 12px';
+  clearBtn.style.cursor = 'pointer';
+  clearBtn.addEventListener('click', () => {
+    renderer.grid.clearCells();
+    renderer.render(renderer.grid);
+  });
+  codeDiv.appendChild(clearBtn);
   
   controlsDiv.appendChild(codeDiv);
   
@@ -118,3 +137,4 @@ function createControls(renderer, grid) {
 
 if (typeof module !== 'undefined') module.exports = createControls;
 if (typeof window !== 'undefined') window.createControls = createControls;
+}());

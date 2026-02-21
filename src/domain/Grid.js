@@ -1,4 +1,5 @@
 /* global Cell */
+(function () {
 const Cell = typeof module !== 'undefined' ? require('./Cell') : window.Cell;
 
 class Grid {
@@ -40,6 +41,14 @@ class Grid {
 
   setGeneticCode(geneticCode) {
     this.geneticCode = geneticCode;
+  }
+
+  clearCells() {
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        this.cells[y][x].clearProteins();
+      }
+    }
   }
 
   tick() {
@@ -134,3 +143,4 @@ class Grid {
 
 if (typeof module !== 'undefined') module.exports = Grid;
 if (typeof window !== 'undefined') window.Grid = Grid;
+}());

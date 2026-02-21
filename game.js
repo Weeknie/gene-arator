@@ -18,6 +18,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Add UI controls
   createControls(renderer, grid);
   
+  // Apply saved genetic code if present
+  const savedCode = typeof localStorage !== 'undefined' ? localStorage.getItem('geneticCode') : null;
+  if (savedCode) {
+    try {
+      grid.setGeneticCode(new GeneticCode(savedCode));
+    } catch (e) {
+      // Ignore invalid saved code
+    }
+  }
+  
   // Start simulation loop
   let isRunning = false;
   let intervalId = null;
@@ -38,6 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   document.getElementById('start-btn').addEventListener('click', startSimulation);
+  
+  // Auto-start the simulation
+  startSimulation();
   
   // Create settings menu
   const settingsContainer = document.querySelector('.container');
