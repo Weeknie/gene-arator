@@ -16,6 +16,7 @@ class GeneticCode {
 
     // Split by semicolon
     const tokens = code.split(';');
+    let tokenIndex = 0;
 
     for (const token of tokens) {
       const trimmedToken = token.trim();
@@ -25,20 +26,28 @@ class GeneticCode {
         continue;
       }
 
+      // Increment token index for non-empty tokens (1-based)
+      tokenIndex++;
+
       // Parse token in format "ProteinName+ProductionRate"
       const parts = trimmedToken.split('+');
       
-      // Skip invalid tokens (must have exactly 2 parts)
+      // Throw error if token doesn't have exactly 2 parts
       if (parts.length !== 2) {
-        continue;
+        throw new Error(`Invalid genetic code at token ${tokenIndex} ("${trimmedToken}"): missing "+" separator`);
       }
 
       const proteinName = parts[0].trim();
       const productionRate = parseFloat(parts[1].trim());
 
-      // Skip if protein name is empty or production rate is invalid
-      if (proteinName === '' || isNaN(productionRate)) {
-        continue;
+      // Throw error if protein name is empty
+      if (proteinName === '') {
+        throw new Error(`Invalid genetic code at token ${tokenIndex} ("${trimmedToken}"): empty protein name`);
+      }
+
+      // Throw error if production rate is invalid
+      if (isNaN(productionRate)) {
+        throw new Error(`Invalid genetic code at token ${tokenIndex} ("${trimmedToken}"): invalid production rate`);
       }
 
       this.genes.set(proteinName, productionRate);
@@ -633,12 +642,26 @@ function createControls(renderer, grid) {
   codeTextarea.placeholder = 'e.g. R+10;G+5';
   codeDiv.appendChild(codeTextarea);
   
+  const errorMessageDiv = document.createElement('div');
+  errorMessageDiv.style.color = 'red';
+  errorMessageDiv.style.fontSize = '12px';
+  errorMessageDiv.style.marginTop = '5px';
+  errorMessageDiv.style.display = 'none';
+  codeDiv.appendChild(errorMessageDiv);
+  
   const applyCodeBtn = document.createElement('button');
   applyCodeBtn.textContent = 'Apply Code';
   applyCodeBtn.style.padding = '6px 12px';
   applyCodeBtn.style.cursor = 'pointer';
   applyCodeBtn.addEventListener('click', () => {
-    renderer.grid.setGeneticCode(new GeneticCode(codeTextarea.value));
+    try {
+      errorMessageDiv.style.display = 'none';
+      errorMessageDiv.textContent = '';
+      renderer.grid.setGeneticCode(new GeneticCode(codeTextarea.value));
+    } catch (error) {
+      errorMessageDiv.textContent = error.message;
+      errorMessageDiv.style.display = 'block';
+    }
   });
   codeDiv.appendChild(applyCodeBtn);
   
