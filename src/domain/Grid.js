@@ -142,6 +142,9 @@ class Grid {
         case '<=':
           conditionMet = proteinAmount <= condition.threshold;
           break;
+        default:
+          // Unknown operator - condition is not met
+          return false;
       }
       
       if (!conditionMet) {

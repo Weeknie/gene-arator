@@ -71,7 +71,8 @@ class GeneticCode {
     for (let i = 0; i < parts.length - 1; i++) {
       const conditionPart = parts[i].trim();
       // Match (ProteinName operator threshold) - check >= and <= before > and <
-      const conditionMatch = conditionPart.match(/^\((\w+)(>=|<=|>|<)(.+)\)$/);
+      // Use restrictive pattern for threshold to only match valid numbers
+      const conditionMatch = conditionPart.match(/^\((\w+)(>=|<=|>|<)(\d+(?:\.\d+)?)\)$/);
       
       if (!conditionMatch) {
         return; // Invalid condition format

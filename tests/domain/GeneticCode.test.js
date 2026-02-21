@@ -136,4 +136,14 @@ describe('GeneticCode', () => {
     expect(geneticCode.conditionalGenes[2].conditions[0].operator).toBe('<');
     expect(geneticCode.conditionalGenes[2].conditions[0].threshold).toBe(20);
   });
+
+  test('should skip invalid conditional expressions with malformed thresholds', () => {
+    const geneticCode = new GeneticCode('(A>20x)->R+10;(B>30)->G+5');
+    
+    // First conditional should be skipped (invalid threshold '20x')
+    // Second conditional should be parsed
+    expect(geneticCode.conditionalGenes.length).toBe(1);
+    expect(geneticCode.conditionalGenes[0].conditions[0].protein).toBe('B');
+    expect(geneticCode.conditionalGenes[0].conditions[0].threshold).toBe(30);
+  });
 });
