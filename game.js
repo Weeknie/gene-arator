@@ -5,6 +5,7 @@
 class GeneticCode {
   constructor(code) {
     this.genes = new Map();
+    this.conditionalGenes = [];
     this._parse(code);
   }
 
@@ -16,6 +17,7 @@ class GeneticCode {
 
     // Split by semicolon
     const tokens = code.split(';');
+    let tokenIndex = 0;
 
     for (const token of tokens) {
       const trimmedToken = token.trim();
@@ -25,24 +27,87 @@ class GeneticCode {
         continue;
       }
 
-      // Parse token in format "ProteinName+ProductionRate"
-      const parts = trimmedToken.split('+');
-      
-      // Skip invalid tokens (must have exactly 2 parts)
-      if (parts.length !== 2) {
-        continue;
+      // Increment token index for non-empty tokens (1-based)
+      tokenIndex++;
+
+      // Check if this is a conditional gene (contains ->)
+      if (trimmedToken.includes('->')) {
+        this._parseConditionalGene(trimmedToken, tokenIndex);
+      } else {
+        // Parse simple gene in format "ProteinName+ProductionRate"
+        const parts = trimmedToken.split('+');
+        
+        // Throw error if token doesn't have exactly 2 parts
+        if (parts.length !== 2) {
+          throw new Error(`Invalid genetic code at token ${tokenIndex} ("${trimmedToken}"): missing "+" separator`);
+        }
+
+        const proteinName = parts[0].trim();
+        const productionRate = parseFloat(parts[1].trim());
+
+        // Throw error if protein name is empty
+        if (proteinName === '') {
+          throw new Error(`Invalid genetic code at token ${tokenIndex} ("${trimmedToken}"): empty protein name`);
+        }
+
+        // Throw error if production rate is invalid
+        if (isNaN(productionRate)) {
+          throw new Error(`Invalid genetic code at token ${tokenIndex} ("${trimmedToken}"): invalid production rate`);
+        }
+
+        this.genes.set(proteinName, productionRate);
       }
-
-      const proteinName = parts[0].trim();
-      const productionRate = parseFloat(parts[1].trim());
-
-      // Skip if protein name is empty or production rate is invalid
-      if (proteinName === '' || isNaN(productionRate)) {
-        continue;
-      }
-
-      this.genes.set(proteinName, productionRate);
     }
+  }
+
+  _parseConditionalGene(token, tokenIndex) {
+    // Split by -> to get conditions and result
+    const parts = token.split('->');
+    
+    // Last part is the result (ProteinName+ProductionRate)
+    const resultPart = parts[parts.length - 1].trim();
+    const resultMatch = resultPart.match(/^(\w+)\+(.+)$/);
+    
+    if (!resultMatch) {
+      throw new Error(`Invalid genetic code at token ${tokenIndex} ("${token}"): invalid result format`);
+    }
+    
+    const proteinName = resultMatch[1];
+    const productionRate = parseFloat(resultMatch[2]);
+    
+    if (isNaN(productionRate)) {
+      throw new Error(`Invalid genetic code at token ${tokenIndex} ("${token}"): invalid production rate`);
+    }
+    
+    // Parse conditions (all parts except the last one)
+    const conditions = [];
+    for (let i = 0; i < parts.length - 1; i++) {
+      const conditionPart = parts[i].trim();
+      // Match (ProteinName operator threshold) - check >= and <= before > and <
+      // Negative thresholds are not supported since protein amounts are always non-negative
+      const conditionMatch = conditionPart.match(/^\((\w+)(>=|<=|>|<)(\d+(?:\.\d+)?)\)$/);
+      
+      if (!conditionMatch) {
+        throw new Error(`Invalid genetic code at token ${tokenIndex} ("${token}"): invalid condition format`);
+      }
+      
+      const threshold = parseFloat(conditionMatch[3]);
+      if (isNaN(threshold)) {
+        throw new Error(`Invalid genetic code at token ${tokenIndex} ("${token}"): invalid condition format`);
+      }
+      
+      conditions.push({
+        protein: conditionMatch[1],
+        operator: conditionMatch[2],
+        threshold: threshold
+      });
+    }
+    
+    this.conditionalGenes.push({
+      conditions: conditions,
+      proteinName: proteinName,
+      productionRate: productionRate
+    });
   }
 }
 
@@ -126,6 +191,20 @@ class Grid {
       }
     }
 
+    // Apply conditional genes
+    if (this.geneticCode && this.geneticCode.conditionalGenes.length > 0) {
+      for (let y = 0; y < this.height; y++) {
+        for (let x = 0; x < this.width; x++) {
+          const cell = this.cells[y][x];
+          for (const conditionalGene of this.geneticCode.conditionalGenes) {
+            if (this._evaluateConditions(cell, conditionalGene.conditions)) {
+              cell.addProtein(conditionalGene.proteinName, conditionalGene.productionRate);
+            }
+          }
+        }
+      }
+    }
+
     // Calculate diffusion amounts for all cells first
     const diffusionAmounts = [];
     
@@ -180,6 +259,37 @@ class Grid {
         this.cells[y][x].decay(this.decayRate);
       }
     }
+  }
+
+  _evaluateConditions(cell, conditions) {
+    for (const condition of conditions) {
+      const proteinAmount = cell.getProteinAmount(condition.protein);
+      
+      let conditionMet = false;
+      switch (condition.operator) {
+        case '>':
+          conditionMet = proteinAmount > condition.threshold;
+          break;
+        case '<':
+          conditionMet = proteinAmount < condition.threshold;
+          break;
+        case '>=':
+          conditionMet = proteinAmount >= condition.threshold;
+          break;
+        case '<=':
+          conditionMet = proteinAmount <= condition.threshold;
+          break;
+        default:
+          // Unknown operator - condition is not met
+          return false;
+      }
+      
+      if (!conditionMet) {
+        return false;
+      }
+    }
+    
+    return true;
   }
 }
 
