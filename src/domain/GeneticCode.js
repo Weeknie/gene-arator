@@ -59,9 +59,9 @@ class GeneticCode {
   _parseConditionalToken(token, tokenIndex) {
     // Split by "->" to separate conditions from production
     const parts = token.split('->');
-    const MIN_PARTS = 2;
+    const MIN_CONDITIONAL_PARTS = 2;
     
-    if (parts.length < MIN_PARTS) {
+    if (parts.length < MIN_CONDITIONAL_PARTS) {
       throw new Error(`Invalid genetic code at token ${tokenIndex} ("${token}"): malformed conditional expression`);
     }
 
@@ -89,6 +89,7 @@ class GeneticCode {
 
   _parseConditions(conditionParts, token, tokenIndex) {
     const conditions = [];
+    // Pattern: ( proteinName(1) operator(2) numericThreshold(3) )
     const conditionPattern = /^\(([^<>]+)([<>])(\d+(?:\.\d+)?)\)$/;
     
     for (const conditionPart of conditionParts) {
