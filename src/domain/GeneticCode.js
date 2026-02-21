@@ -13,6 +13,7 @@ class GeneticCode {
 
     // Split by semicolon
     const tokens = code.split(';');
+    let tokenIndex = 0;
 
     for (const token of tokens) {
       const trimmedToken = token.trim();
@@ -22,24 +23,32 @@ class GeneticCode {
         continue;
       }
 
+      // Increment token index for non-empty tokens (1-based)
+      tokenIndex++;
+
       // Check if this is a conditional gene (contains ->)
       if (trimmedToken.includes('->')) {
-        this._parseConditionalGene(trimmedToken);
+        this._parseConditionalGene(trimmedToken, tokenIndex);
       } else {
         // Parse simple gene in format "ProteinName+ProductionRate"
         const parts = trimmedToken.split('+');
         
-        // Skip invalid tokens (must have exactly 2 parts)
+        // Throw error if token doesn't have exactly 2 parts
         if (parts.length !== 2) {
-          continue;
+          throw new Error(`Invalid genetic code at token ${tokenIndex} ("${trimmedToken}"): missing "+" separator`);
         }
 
         const proteinName = parts[0].trim();
         const productionRate = parseFloat(parts[1].trim());
 
-        // Skip if protein name is empty or production rate is invalid
-        if (proteinName === '' || isNaN(productionRate)) {
-          continue;
+        // Throw error if protein name is empty
+        if (proteinName === '') {
+          throw new Error(`Invalid genetic code at token ${tokenIndex} ("${trimmedToken}"): empty protein name`);
+        }
+
+        // Throw error if production rate is invalid
+        if (isNaN(productionRate)) {
+          throw new Error(`Invalid genetic code at token ${tokenIndex} ("${trimmedToken}"): invalid production rate`);
         }
 
         this.genes.set(proteinName, productionRate);
@@ -47,7 +56,7 @@ class GeneticCode {
     }
   }
 
-  _parseConditionalGene(token) {
+  _parseConditionalGene(token, tokenIndex) {
     // Split by -> to get conditions and result
     const parts = token.split('->');
     
@@ -56,14 +65,14 @@ class GeneticCode {
     const resultMatch = resultPart.match(/^(\w+)\+(.+)$/);
     
     if (!resultMatch) {
-      return; // Invalid result format
+      throw new Error(`Invalid genetic code at token ${tokenIndex} ("${token}"): invalid result format`);
     }
     
     const proteinName = resultMatch[1];
     const productionRate = parseFloat(resultMatch[2]);
     
     if (isNaN(productionRate)) {
-      return;
+      throw new Error(`Invalid genetic code at token ${tokenIndex} ("${token}"): invalid production rate`);
     }
     
     // Parse conditions (all parts except the last one)
@@ -75,12 +84,12 @@ class GeneticCode {
       const conditionMatch = conditionPart.match(/^\((\w+)(>=|<=|>|<)(\d+(?:\.\d+)?)\)$/);
       
       if (!conditionMatch) {
-        return; // Invalid condition format
+        throw new Error(`Invalid genetic code at token ${tokenIndex} ("${token}"): invalid condition format`);
       }
       
       const threshold = parseFloat(conditionMatch[3]);
       if (isNaN(threshold)) {
-        return;
+        throw new Error(`Invalid genetic code at token ${tokenIndex} ("${token}"): invalid condition format`);
       }
       
       conditions.push({

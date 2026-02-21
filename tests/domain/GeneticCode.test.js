@@ -43,12 +43,10 @@ describe('GeneticCode', () => {
     expect(geneticCode.genes.get('B')).toBe(0.5);
   });
 
-  test('should skip invalid tokens without crashing', () => {
-    const geneticCode = new GeneticCode('A+2;invalid;B+0.5');
-    
-    expect(geneticCode.genes.size).toBe(2);
-    expect(geneticCode.genes.get('A')).toBe(2);
-    expect(geneticCode.genes.get('B')).toBe(0.5);
+  test('should throw error for invalid token with missing separator', () => {
+    expect(() => {
+      new GeneticCode('A+2;invalid;B+0.5');
+    }).toThrow('Invalid genetic code at token 2 ("invalid"): missing "+" separator');
   });
 
   test('should skip empty tokens between semicolons', () => {
@@ -137,13 +135,21 @@ describe('GeneticCode', () => {
     expect(geneticCode.conditionalGenes[2].conditions[0].threshold).toBe(20);
   });
 
-  test('should skip invalid conditional expressions with malformed thresholds', () => {
-    const geneticCode = new GeneticCode('(A>20x)->R+10;(B>30)->G+5');
-    
-    // First conditional should be skipped (invalid threshold '20x')
-    // Second conditional should be parsed
-    expect(geneticCode.conditionalGenes.length).toBe(1);
-    expect(geneticCode.conditionalGenes[0].conditions[0].protein).toBe('B');
-    expect(geneticCode.conditionalGenes[0].conditions[0].threshold).toBe(30);
+  test('should throw error for invalid conditional expression with malformed condition', () => {
+    expect(() => {
+      new GeneticCode('(A>20x)->R+10');
+    }).toThrow('Invalid genetic code at token 1 ("(A>20x)->R+10"): invalid condition format');
+  });
+
+  test('should throw error for invalid conditional expression with invalid production rate', () => {
+    expect(() => {
+      new GeneticCode('(A>20)->R+abc');
+    }).toThrow('Invalid genetic code at token 1 ("(A>20)->R+abc"): invalid production rate');
+  });
+
+  test('should throw error for invalid conditional expression with missing result separator', () => {
+    expect(() => {
+      new GeneticCode('(A>20)->invalid');
+    }).toThrow('Invalid genetic code at token 1 ("(A>20)->invalid"): invalid result format');
   });
 });
