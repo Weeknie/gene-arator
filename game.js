@@ -1,4 +1,7 @@
 // GeneticCode class
+// Note: This class is duplicated from src/domain/GeneticCode.js
+// for browser compatibility (game.js doesn't use module imports).
+// Any changes to GeneticCode.js must be reflected here.
 class GeneticCode {
   constructor(code) {
     this.genes = new Map();
