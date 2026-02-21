@@ -220,4 +220,75 @@ describe('Grid', () => {
       }
     }
   });
+
+  // Conditional gene tests
+  test('should not apply conditional gene when condition is not met', () => {
+    const grid = new Grid(2, 2, 0.0, 0.0); // No decay, no diffusion
+    const geneticCode = new GeneticCode('(A>20)->R+10');
+    grid.setGeneticCode(geneticCode);
+    
+    // Add only 10 of protein A to one cell
+    grid.getCell(0, 0).addProtein('A', 10);
+    
+    grid.tick();
+    
+    // R should not be produced because A is not > 20
+    expect(grid.getCell(0, 0).getProteinAmount('R')).toBe(0);
+  });
+
+  test('should apply conditional gene when condition is met', () => {
+    const grid = new Grid(2, 2, 0.0, 0.0); // No decay, no diffusion
+    const geneticCode = new GeneticCode('(A>20)->R+10');
+    grid.setGeneticCode(geneticCode);
+    
+    // Add 25 of protein A to one cell
+    grid.getCell(0, 0).addProtein('A', 25);
+    
+    grid.tick();
+    
+    // R should be produced because A > 20
+    expect(grid.getCell(0, 0).getProteinAmount('R')).toBe(10);
+    
+    // Cell without enough A should not produce R
+    expect(grid.getCell(1, 1).getProteinAmount('R')).toBe(0);
+  });
+
+  test('should apply chained conditional gene only when all conditions are met', () => {
+    const grid = new Grid(2, 2, 0.0, 0.0); // No decay, no diffusion
+    const geneticCode = new GeneticCode('(A>10)->(B>20)->R+2');
+    grid.setGeneticCode(geneticCode);
+    
+    const cell = grid.getCell(0, 0);
+    
+    // Case 1: Only first condition met
+    cell.addProtein('A', 15);
+    grid.tick();
+    expect(cell.getProteinAmount('R')).toBe(0);
+    
+    // Case 2: Only second condition met
+    cell.clearProteins();
+    cell.addProtein('B', 25);
+    grid.tick();
+    expect(cell.getProteinAmount('R')).toBe(0);
+    
+    // Case 3: Both conditions met
+    cell.clearProteins();
+    cell.addProtein('A', 15);
+    cell.addProtein('B', 25);
+    grid.tick();
+    expect(cell.getProteinAmount('R')).toBe(2);
+  });
+
+  test('should apply conditional gene when condition references a protein produced by unconditional gene in same tick', () => {
+    const grid = new Grid(2, 2, 0.0, 0.0); // No decay, no diffusion
+    const geneticCode = new GeneticCode('A+25;(A>20)->R+10');
+    grid.setGeneticCode(geneticCode);
+    
+    grid.tick();
+    
+    // A should be produced first (25), then condition should be checked (25 > 20 is true)
+    // So R should also be produced
+    expect(grid.getCell(0, 0).getProteinAmount('A')).toBe(25);
+    expect(grid.getCell(0, 0).getProteinAmount('R')).toBe(10);
+  });
 });

@@ -89,4 +89,18 @@ describe('Cell', () => {
     
     expect(cell.getProteinAmount('R')).toBeGreaterThanOrEqual(0);
   });
+
+  test('should clear all proteins from cell', () => {
+    const cell = new Cell(0, 0);
+    cell.addProtein('R', 100);
+    cell.addProtein('G', 50);
+    cell.addProtein('B', 75);
+    
+    cell.clearProteins();
+    
+    expect(cell.getProteinAmount('R')).toBe(0);
+    expect(cell.getProteinAmount('G')).toBe(0);
+    expect(cell.getProteinAmount('B')).toBe(0);
+    expect(cell.proteins.size).toBe(0);
+  });
 });

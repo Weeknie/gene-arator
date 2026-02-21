@@ -95,4 +95,63 @@ describe('GeneticCode', () => {
       new GeneticCode('A+2;B+3;invalid');
     }).toThrow('Invalid genetic code at token 3 ("invalid"): missing "+" separator');
   });
+
+  // Conditional gene tests
+  test('should parse a single conditional gene', () => {
+    const geneticCode = new GeneticCode('(A>20)->R+10');
+    
+    expect(geneticCode.conditionalGenes).toBeDefined();
+    expect(geneticCode.conditionalGenes.length).toBe(1);
+    expect(geneticCode.conditionalGenes[0]).toEqual({
+      conditions: [{ protein: 'A', operator: '>', threshold: 20 }],
+      proteinName: 'R',
+      productionRate: 10
+    });
+  });
+
+  test('should parse a conditional gene with less-than operator', () => {
+    const geneticCode = new GeneticCode('(B<5)->G+3');
+    
+    expect(geneticCode.conditionalGenes.length).toBe(1);
+    expect(geneticCode.conditionalGenes[0]).toEqual({
+      conditions: [{ protein: 'B', operator: '<', threshold: 5 }],
+      proteinName: 'G',
+      productionRate: 3
+    });
+  });
+
+  test('should parse a conditional gene with chained conditions', () => {
+    const geneticCode = new GeneticCode('(A>10)->(B>20)->R+2');
+    
+    expect(geneticCode.conditionalGenes.length).toBe(1);
+    expect(geneticCode.conditionalGenes[0]).toEqual({
+      conditions: [
+        { protein: 'A', operator: '>', threshold: 10 },
+        { protein: 'B', operator: '>', threshold: 20 }
+      ],
+      proteinName: 'R',
+      productionRate: 2
+    });
+  });
+
+  test('should throw error for malformed condition', () => {
+    expect(() => {
+      new GeneticCode('(A>>20)->R+10');
+    }).toThrow(/Invalid genetic code/);
+  });
+
+  test('should parse mix of unconditional and conditional genes', () => {
+    const geneticCode = new GeneticCode('A+5;(B>10)->C+3;D+2');
+    
+    expect(geneticCode.genes.size).toBe(2);
+    expect(geneticCode.genes.get('A')).toBe(5);
+    expect(geneticCode.genes.get('D')).toBe(2);
+    
+    expect(geneticCode.conditionalGenes.length).toBe(1);
+    expect(geneticCode.conditionalGenes[0]).toEqual({
+      conditions: [{ protein: 'B', operator: '>', threshold: 10 }],
+      proteinName: 'C',
+      productionRate: 3
+    });
+  });
 });
