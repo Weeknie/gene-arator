@@ -266,6 +266,20 @@ describe('GridRenderer', () => {
     expect(parseInt(match[3])).toBeGreaterThanOrEqual(50); // High lightness
   });
 
+  test('should clamp lightness to minimum 50% to prevent black colors', () => {
+    const grid = new Grid(3, 3);
+    grid.getCell(1, 1).addProtein('R', 300); // Exceeds 255, s < 1, finalL would drop below 0.5
+    
+    const renderer = new GridRenderer(container);
+    const color = renderer.getCellColor(grid.getCell(1, 1));
+    
+    // Lightness must be at least 50% to never go to black
+    const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+    expect(match).toBeTruthy();
+    const lightness = parseInt(match[3]);
+    expect(lightness).toBeGreaterThanOrEqual(50);
+  });
+
   test('should handle protein values exceeding 255 without producing invalid lightness', () => {
     const grid = new Grid(3, 3);
     grid.getCell(1, 1).addProtein('R', 300);
@@ -275,12 +289,12 @@ describe('GridRenderer', () => {
     // Test the getCellColor method directly
     const color = renderer.getCellColor(grid.getCell(1, 1));
     
-    // Should produce valid HSL with lightness between 0-100%
+    // Should produce valid HSL with lightness between 50-100%
     expect(color).toContain('hsl');
     const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
     expect(match).toBeTruthy();
     const lightness = parseInt(match[3]);
-    expect(lightness).toBeGreaterThanOrEqual(0);
+    expect(lightness).toBeGreaterThanOrEqual(50);
     expect(lightness).toBeLessThanOrEqual(100);
   });
 
@@ -293,12 +307,12 @@ describe('GridRenderer', () => {
     // Test the getCellColor method directly
     const color = renderer.getCellColor(grid.getCell(1, 1));
     
-    // Should produce valid HSL with lightness between 0-100%
+    // Should produce valid HSL with lightness between 50-100%
     expect(color).toContain('hsl');
     const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
     expect(match).toBeTruthy();
     const lightness = parseInt(match[3]);
-    expect(lightness).toBeGreaterThanOrEqual(0);
+    expect(lightness).toBeGreaterThanOrEqual(50);
     expect(lightness).toBeLessThanOrEqual(100);
   });
 });
