@@ -406,8 +406,13 @@ class SettingsMenu {
 
 // Initialize the game when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+  // Default grid settings
+  const DEFAULT_GRID_SIZE = 20;
+  const DEFAULT_DIFFUSION_RATE = 0.2;
+  const DEFAULT_DECAY_RATE = 0.1;
+  
   const container = document.getElementById('game-container');
-  let grid = new Grid(20, 20);
+  let grid = new Grid(DEFAULT_GRID_SIZE, DEFAULT_GRID_SIZE, DEFAULT_DECAY_RATE, DEFAULT_DIFFUSION_RATE);
   const renderer = new GridRenderer(container);
   
   // Initial render
@@ -465,9 +470,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Render settings menu with default values
   settingsMenu.render({
-    gridSize: 20,
-    diffusionRate: 0.2,
-    decayRate: 0.1
+    gridSize: DEFAULT_GRID_SIZE,
+    diffusionRate: DEFAULT_DIFFUSION_RATE,
+    decayRate: DEFAULT_DECAY_RATE
   });
 });
 
