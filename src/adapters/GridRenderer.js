@@ -80,8 +80,8 @@ class GridRenderer {
     // Compute final lightness
     let finalL = 1 - (1 - L) / s;
     
-    // Clamp finalL to valid range [0, 1] to handle edge cases
-    finalL = Math.max(0, Math.min(1, finalL));
+    // Clamp finalL to valid range [0.5, 1] to handle edge cases and prevent black colors
+    finalL = Math.max(0.5, Math.min(1, finalL));
     
     // Return HSL string
     return `hsl(${Math.round(H)}, ${Math.round(S * 100)}%, ${Math.round(finalL * 100)}%)`;
