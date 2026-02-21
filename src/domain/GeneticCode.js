@@ -119,4 +119,5 @@ class GeneticCode {
   }
 }
 
-module.exports = GeneticCode;
+if (typeof module !== 'undefined') module.exports = GeneticCode;
+if (typeof window !== 'undefined') window.GeneticCode = GeneticCode;

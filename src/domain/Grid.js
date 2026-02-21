@@ -1,4 +1,5 @@
-const Cell = require('./Cell');
+/* global Cell */
+const Cell = typeof module !== 'undefined' ? require('./Cell') : window.Cell;
 
 class Grid {
   constructor(width, height, decayRate = 0.1, diffusionRate = 0.2) {
@@ -131,4 +132,5 @@ class Grid {
   }
 }
 
-module.exports = Grid;
+if (typeof module !== 'undefined') module.exports = Grid;
+if (typeof window !== 'undefined') window.Grid = Grid;

@@ -26,4 +26,5 @@ class Cell {
   }
 }
 
-module.exports = Cell;
+if (typeof module !== 'undefined') module.exports = Cell;
+if (typeof window !== 'undefined') window.Cell = Cell;
