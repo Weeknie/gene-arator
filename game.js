@@ -168,20 +168,25 @@ class GridRenderer {
       // Saturation
       S = delta / (1 - Math.abs(2 * L - 1));
       
-      // Hue based on which channel is max (use original values to determine which is max)
-      if (r === max) {
+      // Hue based on which channel is max
+      // Use scaled values to avoid floating-point precision issues
+      const maxScaled = Math.max(scaledR, scaledG, scaledB);
+      if (scaledR === maxScaled) {
         H = (((gN - bN) / delta) % 6) * 60;
         // Wrap negative to positive
         if (H < 0) H += 360;
-      } else if (g === max) {
+      } else if (scaledG === maxScaled) {
         H = ((bN - rN) / delta + 2) * 60;
-      } else if (b === max) {
+      } else if (scaledB === maxScaled) {
         H = ((rN - gN) / delta + 4) * 60;
       }
     }
     
     // Compute final lightness
-    const finalL = 1 - (1 - L) / s;
+    let finalL = 1 - (1 - L) / s;
+    
+    // Clamp finalL to valid range [0, 1] to handle edge cases
+    finalL = Math.max(0, Math.min(1, finalL));
     
     // Return HSL string
     return `hsl(${Math.round(H)}, ${Math.round(S * 100)}%, ${Math.round(finalL * 100)}%)`;

@@ -265,4 +265,40 @@ describe('GridRenderer', () => {
     expect(parseInt(match[2])).toBe(0); // S = 0% (no saturation for white)
     expect(parseInt(match[3])).toBeGreaterThanOrEqual(50); // High lightness
   });
+
+  test('should handle protein values exceeding 255 without producing invalid lightness', () => {
+    const grid = new Grid(3, 3);
+    grid.getCell(1, 1).addProtein('R', 300);
+    
+    const renderer = new GridRenderer(container);
+    
+    // Test the getCellColor method directly
+    const color = renderer.getCellColor(grid.getCell(1, 1));
+    
+    // Should produce valid HSL with lightness between 0-100%
+    expect(color).toContain('hsl');
+    const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(-?\d+)%\)/);
+    expect(match).toBeTruthy();
+    const lightness = parseInt(match[3]);
+    expect(lightness).toBeGreaterThanOrEqual(0);
+    expect(lightness).toBeLessThanOrEqual(100);
+  });
+
+  test('should handle very large protein values gracefully', () => {
+    const grid = new Grid(3, 3);
+    grid.getCell(1, 1).addProtein('R', 1000);
+    
+    const renderer = new GridRenderer(container);
+    
+    // Test the getCellColor method directly
+    const color = renderer.getCellColor(grid.getCell(1, 1));
+    
+    // Should produce valid HSL with lightness between 0-100%
+    expect(color).toContain('hsl');
+    const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(-?\d+)%\)/);
+    expect(match).toBeTruthy();
+    const lightness = parseInt(match[3]);
+    expect(lightness).toBeGreaterThanOrEqual(0);
+    expect(lightness).toBeLessThanOrEqual(100);
+  });
 });
