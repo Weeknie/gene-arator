@@ -126,6 +126,22 @@ class GridRenderer {
     this.grid = null;
   }
 
+  /**
+   * Convert cell protein amounts to HSL color.
+   * 
+   * This method implements an HSL-based coloring algorithm that:
+   * 1. Scales RGB protein values so max = 255
+   * 2. Converts to HSL color space
+   * 3. Adjusts lightness based on scaling factor
+   * 4. Returns HSL string suitable for CSS
+   * 
+   * Note: This method is duplicated from src/adapters/GridRenderer.js
+   * for browser compatibility (game.js doesn't use module imports).
+   * Any changes to GridRenderer.js must be reflected here.
+   * 
+   * @param {Cell} cell - The cell to get color for
+   * @returns {string} HSL color string (e.g., "hsl(0, 100%, 50%)")
+   */
   getCellColor(cell) {
     // Get R, G, B protein amounts (no capping at 255)
     const r = Math.floor(cell.getProteinAmount('R'));

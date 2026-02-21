@@ -277,7 +277,7 @@ describe('GridRenderer', () => {
     
     // Should produce valid HSL with lightness between 0-100%
     expect(color).toContain('hsl');
-    const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(-?\d+)%\)/);
+    const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
     expect(match).toBeTruthy();
     const lightness = parseInt(match[3]);
     expect(lightness).toBeGreaterThanOrEqual(0);
@@ -295,7 +295,7 @@ describe('GridRenderer', () => {
     
     // Should produce valid HSL with lightness between 0-100%
     expect(color).toContain('hsl');
-    const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(-?\d+)%\)/);
+    const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
     expect(match).toBeTruthy();
     const lightness = parseInt(match[3]);
     expect(lightness).toBeGreaterThanOrEqual(0);
