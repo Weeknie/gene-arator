@@ -1,4 +1,5 @@
 const Grid = require('../../src/domain/Grid');
+const GeneticCode = require('../../src/domain/GeneticCode');
 
 describe('Grid', () => {
   test('should create a grid with specified width and height', () => {
@@ -127,5 +128,78 @@ describe('Grid', () => {
     
     // Neighboring cells should have some protein from diffusion
     expect(grid.getCell(0, 1).getProteinAmount('R')).toBeGreaterThan(0);
+  });
+
+  test('should produce protein according to genetic code in every cell each tick', () => {
+    const grid = new Grid(3, 3, 0.0, 0.0); // No decay, no diffusion
+    const geneticCode = new GeneticCode('R+10');
+    grid.setGeneticCode(geneticCode);
+    
+    grid.tick();
+    
+    // Every cell should have 10 of R protein
+    for (let y = 0; y < 3; y++) {
+      for (let x = 0; x < 3; x++) {
+        expect(grid.getCell(x, y).getProteinAmount('R')).toBe(10);
+      }
+    }
+  });
+
+  test('should produce fractional protein amounts according to genetic code', () => {
+    const grid = new Grid(3, 3, 0.0, 0.0); // No decay, no diffusion
+    const geneticCode = new GeneticCode('A+0.5');
+    grid.setGeneticCode(geneticCode);
+    
+    grid.tick();
+    
+    // Every cell should have 0.5 of A protein
+    for (let y = 0; y < 3; y++) {
+      for (let x = 0; x < 3; x++) {
+        expect(grid.getCell(x, y).getProteinAmount('A')).toBe(0.5);
+      }
+    }
+  });
+
+  test('should accumulate protein production over multiple ticks', () => {
+    const grid = new Grid(2, 2, 0.0, 0.0); // No decay, no diffusion
+    const geneticCode = new GeneticCode('B+3');
+    grid.setGeneticCode(geneticCode);
+    
+    grid.tick();
+    grid.tick();
+    grid.tick();
+    
+    // After 3 ticks, every cell should have 9 of B protein
+    expect(grid.getCell(0, 0).getProteinAmount('B')).toBe(9);
+    expect(grid.getCell(1, 1).getProteinAmount('B')).toBe(9);
+  });
+
+  test('should produce multiple protein types according to genetic code', () => {
+    const grid = new Grid(2, 2, 0.0, 0.0); // No decay, no diffusion
+    const geneticCode = new GeneticCode('R+5;G+3;B+1');
+    grid.setGeneticCode(geneticCode);
+    
+    grid.tick();
+    
+    // Every cell should have all three proteins
+    const cell = grid.getCell(0, 0);
+    expect(cell.getProteinAmount('R')).toBe(5);
+    expect(cell.getProteinAmount('G')).toBe(3);
+    expect(cell.getProteinAmount('B')).toBe(1);
+  });
+
+  test('should apply genetic code production before diffusion', () => {
+    const grid = new Grid(3, 3, 0.0, 0.5); // No decay, 50% diffusion
+    const geneticCode = new GeneticCode('P+10');
+    grid.setGeneticCode(geneticCode);
+    
+    grid.tick();
+    
+    // All cells should have protein (some from production, some from diffusion)
+    for (let y = 0; y < 3; y++) {
+      for (let x = 0; x < 3; x++) {
+        expect(grid.getCell(x, y).getProteinAmount('P')).toBeGreaterThan(0);
+      }
+    }
   });
 });
