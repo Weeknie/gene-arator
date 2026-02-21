@@ -154,4 +154,38 @@ describe('GeneticCode', () => {
       productionRate: 3
     });
   });
+
+  // Negative production rate tests
+  test('should parse unconditional gene with negative production rate', () => {
+    const geneticCode = new GeneticCode('R-2');
+
+    expect(geneticCode.genes.size).toBe(1);
+    expect(geneticCode.genes.get('R')).toBe(-2);
+  });
+
+  test('should parse unconditional gene with negative float production rate', () => {
+    const geneticCode = new GeneticCode('R-0.5');
+
+    expect(geneticCode.genes.size).toBe(1);
+    expect(geneticCode.genes.get('R')).toBe(-0.5);
+  });
+
+  test('should parse conditional gene with negative production rate', () => {
+    const geneticCode = new GeneticCode('(A>10)->R-5');
+
+    expect(geneticCode.conditionalGenes.length).toBe(1);
+    expect(geneticCode.conditionalGenes[0]).toEqual({
+      conditions: [{ protein: 'A', operator: '>', threshold: 10 }],
+      proteinName: 'R',
+      productionRate: -5
+    });
+  });
+
+  test('should parse mix of positive and negative unconditional genes', () => {
+    const geneticCode = new GeneticCode('A+5;R-2');
+
+    expect(geneticCode.genes.size).toBe(2);
+    expect(geneticCode.genes.get('A')).toBe(5);
+    expect(geneticCode.genes.get('R')).toBe(-2);
+  });
 });

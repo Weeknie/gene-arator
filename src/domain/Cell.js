@@ -7,7 +7,7 @@ class Cell {
 
   addProtein(proteinName, amount) {
     const currentAmount = this.proteins.get(proteinName) || 0;
-    this.proteins.set(proteinName, currentAmount + amount);
+    this.proteins.set(proteinName, Math.max(0, currentAmount + amount));
   }
 
   getProteinAmount(proteinName) {
