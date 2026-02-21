@@ -66,9 +66,10 @@ class Grid {
         
         // For each protein in this cell
         for (const [proteinName, amount] of cell.proteins.entries()) {
-          if (amount > 0 && neighbors.length > 0) {
+          if (amount > 0) {
             const amountToDiffuse = amount * this.diffusionRate;
-            const amountPerNeighbor = amountToDiffuse / neighbors.length;
+            // Always divide by 4 (fully surrounded); out-of-bounds protein is discarded
+            const amountPerNeighbor = amountToDiffuse / 4;
             
             cellDiffusion.set(proteinName, {
               outgoing: amountToDiffuse,

@@ -138,9 +138,10 @@ class Grid {
         
         // For each protein in this cell
         for (const [proteinName, amount] of cell.proteins.entries()) {
-          if (amount > 0 && neighbors.length > 0) {
+          if (amount > 0) {
             const amountToDiffuse = amount * this.diffusionRate;
-            const amountPerNeighbor = amountToDiffuse / neighbors.length;
+            // Always divide by 4 (fully surrounded); out-of-bounds protein is discarded
+            const amountPerNeighbor = amountToDiffuse / 4;
             
             cellDiffusion.set(proteinName, {
               outgoing: amountToDiffuse,
@@ -391,22 +392,6 @@ class SettingsMenu {
       0.01
     );
 
-    // Genetic code textarea
-    const geneticCodeField = document.createElement('div');
-    geneticCodeField.className = 'settings-field';
-
-    const geneticCodeLabel = document.createElement('label');
-    geneticCodeLabel.textContent = 'Genetic Code';
-    geneticCodeLabel.htmlFor = 'settings-genetic-code';
-
-    const geneticCodeTextarea = document.createElement('textarea');
-    geneticCodeTextarea.id = 'settings-genetic-code';
-    geneticCodeTextarea.rows = 4;
-    geneticCodeTextarea.value = currentSettings.geneticCode || '';
-
-    geneticCodeField.appendChild(geneticCodeLabel);
-    geneticCodeField.appendChild(geneticCodeTextarea);
-
     // Apply button
     const applyButton = document.createElement('button');
     applyButton.className = 'settings-apply-btn';
@@ -415,13 +400,11 @@ class SettingsMenu {
       const gridSizeInput = panel.querySelector('#settings-grid-size');
       const diffusionRateInput = panel.querySelector('#settings-diffusion-rate');
       const decayRateInput = panel.querySelector('#settings-decay-rate');
-      const geneticCodeTextarea = panel.querySelector('#settings-genetic-code');
 
       const newSettings = {
         gridSize: Number(gridSizeInput.value),
         diffusionRate: Number(diffusionRateInput.value),
-        decayRate: Number(decayRateInput.value),
-        geneticCode: geneticCodeTextarea.value
+        decayRate: Number(decayRateInput.value)
       };
 
       this.onApply(newSettings);
@@ -432,7 +415,6 @@ class SettingsMenu {
     panel.appendChild(gridSizeField);
     panel.appendChild(diffusionRateField);
     panel.appendChild(decayRateField);
-    panel.appendChild(geneticCodeField);
     panel.appendChild(applyButton);
 
     // Append button and panel to wrapper
@@ -503,7 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Initial render
   renderer.render(grid);
-  renderer.enableProteinInjection(grid, 'R', 100);
+  renderer.enableProteinInjection(grid, 'R', 255);
   
   // Add UI controls
   createControls(renderer, grid);
@@ -547,22 +529,22 @@ document.addEventListener('DOMContentLoaded', () => {
       newSettings.diffusionRate
     );
     
-    // Set genetic code on the new grid
-    grid.setGeneticCode(new GeneticCode(newSettings.geneticCode || ''));
+    // Set genetic code from the standalone input
+    const codeTextarea = document.getElementById('genetic-code-input');
+    grid.setGeneticCode(new GeneticCode(codeTextarea ? codeTextarea.value : ''));
     
     // Re-render
     renderer.render(grid);
     
     // Re-enable protein injection
-    renderer.enableProteinInjection(grid, renderer.selectedProtein, renderer.injectionAmount);
+    renderer.enableProteinInjection(grid, renderer.selectedProtein, 255);
   });
   
   // Render settings menu with default values
   settingsMenu.render({
     gridSize: DEFAULT_GRID_SIZE,
     diffusionRate: DEFAULT_DIFFUSION_RATE,
-    decayRate: DEFAULT_DECAY_RATE,
-    geneticCode: DEFAULT_GENETIC_CODE
+    decayRate: DEFAULT_DECAY_RATE
   });
 });
 
@@ -632,38 +614,35 @@ function createControls(renderer, grid) {
   
   controlsDiv.appendChild(proteinDiv);
   
-  // Amount slider
-  const amountDiv = document.createElement('div');
-  amountDiv.style.display = 'flex';
-  amountDiv.style.gap = '10px';
-  amountDiv.style.alignItems = 'center';
+  // Genetic code textarea
+  const codeDiv = document.createElement('div');
+  codeDiv.style.display = 'flex';
+  codeDiv.style.gap = '10px';
+  codeDiv.style.alignItems = 'flex-start';
   
-  const amountLabel = document.createElement('label');
-  amountLabel.textContent = 'Amount: ';
-  amountLabel.style.fontWeight = 'bold';
-  amountDiv.appendChild(amountLabel);
+  const codeLabel = document.createElement('label');
+  codeLabel.textContent = 'Genetic Code: ';
+  codeLabel.style.fontWeight = 'bold';
+  codeLabel.htmlFor = 'genetic-code-input';
+  codeDiv.appendChild(codeLabel);
   
-  const slider = document.createElement('input');
-  slider.type = 'range';
-  slider.min = '10';
-  slider.max = '255';
-  slider.value = '100';
-  slider.style.width = '200px';
+  const codeTextarea = document.createElement('textarea');
+  codeTextarea.id = 'genetic-code-input';
+  codeTextarea.rows = 3;
+  codeTextarea.style.width = '200px';
+  codeTextarea.placeholder = 'e.g. R+10;G+5';
+  codeDiv.appendChild(codeTextarea);
   
-  const valueDisplay = document.createElement('span');
-  valueDisplay.textContent = '100';
-  valueDisplay.style.minWidth = '40px';
-  valueDisplay.style.fontWeight = 'bold';
-  
-  slider.addEventListener('input', (e) => {
-    const value = parseInt(e.target.value);
-    renderer.setInjectionAmount(value);
-    valueDisplay.textContent = value;
+  const applyCodeBtn = document.createElement('button');
+  applyCodeBtn.textContent = 'Apply Code';
+  applyCodeBtn.style.padding = '6px 12px';
+  applyCodeBtn.style.cursor = 'pointer';
+  applyCodeBtn.addEventListener('click', () => {
+    renderer.grid.setGeneticCode(new GeneticCode(codeTextarea.value));
   });
+  codeDiv.appendChild(applyCodeBtn);
   
-  amountDiv.appendChild(slider);
-  amountDiv.appendChild(valueDisplay);
-  controlsDiv.appendChild(amountDiv);
+  controlsDiv.appendChild(codeDiv);
   
   document.getElementById('game-container').parentElement.appendChild(controlsDiv);
 }
