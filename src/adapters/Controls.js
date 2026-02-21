@@ -1,5 +1,7 @@
 /* global GeneticCode */
-const GeneticCode = typeof module !== 'undefined' ? require('../domain/GeneticCode') : window.GeneticCode;
+if (typeof module !== 'undefined') {
+  var GeneticCode = require('../domain/GeneticCode');
+}
 
 function createControls(renderer, grid) {
   const controlsDiv = document.createElement('div');
