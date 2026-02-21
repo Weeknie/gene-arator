@@ -30,16 +30,23 @@ class GeneticCode {
       if (trimmedToken.includes('->')) {
         this._parseConditionalToken(trimmedToken, tokenIndex);
       } else {
-        // Parse unconditional token in format "ProteinName+ProductionRate"
-        const parts = trimmedToken.split('+');
-        
-        // Throw error if token doesn't have exactly 2 parts
+        // Parse unconditional token in format "ProteinName+ProductionRate" or "ProteinName-ProductionRate"
+        let parts = trimmedToken.split('+');
+        let sign = 1;
+
         if (parts.length !== 2) {
-          throw new Error(`Invalid genetic code at token ${tokenIndex} ("${trimmedToken}"): missing "+" separator`);
+          // Try negative production rate format "ProteinName-ProductionRate"
+          const negativeParts = trimmedToken.split('-');
+          if (negativeParts.length === 2) {
+            parts = negativeParts;
+            sign = -1;
+          } else {
+            throw new Error(`Invalid genetic code at token ${tokenIndex} ("${trimmedToken}"): missing "+" separator`);
+          }
         }
 
         const proteinName = parts[0].trim();
-        const productionRate = parseFloat(parts[1].trim());
+        const productionRate = sign * parseFloat(parts[1].trim());
 
         // Throw error if protein name is empty
         if (proteinName === '') {
@@ -65,9 +72,9 @@ class GeneticCode {
       throw new Error(`Invalid genetic code at token ${tokenIndex} ("${token}"): malformed conditional expression`);
     }
 
-    // Last part is the production (ProteinName+Rate)
+    // Last part is the production (ProteinName+Rate or ProteinName-Rate)
     const productionPart = parts[parts.length - 1].trim();
-    const productionPattern = /^([^+]+)\+(\d+(?:\.\d+)?)$/;
+    const productionPattern = /^([^+\-]+)([+\-])(\d+(?:\.\d+)?)$/;
     const productionMatch = productionPart.match(productionPattern);
     
     if (!productionMatch) {
@@ -75,7 +82,8 @@ class GeneticCode {
     }
 
     const proteinName = productionMatch[1].trim();
-    const productionRate = parseFloat(productionMatch[2]);
+    const sign = productionMatch[2] === '-' ? -1 : 1;
+    const productionRate = sign * parseFloat(productionMatch[3]);
 
     // All preceding parts are conditions
     const conditions = this._parseConditions(parts.slice(0, -1), token, tokenIndex);

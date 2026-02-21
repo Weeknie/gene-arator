@@ -90,6 +90,24 @@ describe('Cell', () => {
     expect(cell.getProteinAmount('R')).toBeGreaterThanOrEqual(0);
   });
 
+  test('should not let protein amount go below 0 when adding negative amount', () => {
+    const cell = new Cell(0, 0);
+    cell.addProtein('R', 3);
+
+    cell.addProtein('R', -5);
+
+    expect(cell.getProteinAmount('R')).toBe(0);
+  });
+
+  test('should reduce protein amount by negative addition without going below 0', () => {
+    const cell = new Cell(0, 0);
+    cell.addProtein('R', 10);
+
+    cell.addProtein('R', -3);
+
+    expect(cell.getProteinAmount('R')).toBe(7);
+  });
+
   test('should clear all proteins from cell', () => {
     const cell = new Cell(0, 0);
     cell.addProtein('R', 100);
