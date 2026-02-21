@@ -122,7 +122,7 @@ class GridRenderer {
   constructor(container) {
     this.container = container;
     this.selectedProtein = 'R';
-    this.injectionAmount = 100;
+    this.injectionAmount = 255;
     this.grid = null;
   }
 
@@ -144,7 +144,7 @@ class GridRenderer {
     return `rgb(${r}, ${g}, ${b})`;
   }
 
-  enableProteinInjection(grid, proteinType = 'R', amount = 100) {
+  enableProteinInjection(grid, proteinType = 'R', amount = 255) {
     this.grid = grid;
     this.selectedProtein = proteinType;
     this.injectionAmount = amount;
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Initial render
   renderer.render(grid);
-  renderer.enableProteinInjection(grid, 'R', 100);
+  renderer.enableProteinInjection(grid, 'R', 255);
   
   // Add UI controls
   createControls(renderer, grid);
@@ -326,11 +326,11 @@ function createControls(renderer, grid) {
   slider.type = 'range';
   slider.min = '10';
   slider.max = '255';
-  slider.value = '100';
+  slider.value = '255';
   slider.style.width = '200px';
   
   const valueDisplay = document.createElement('span');
-  valueDisplay.textContent = '100';
+  valueDisplay.textContent = '255';
   valueDisplay.style.minWidth = '40px';
   valueDisplay.style.fontWeight = 'bold';
   
