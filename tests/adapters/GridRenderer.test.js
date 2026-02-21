@@ -76,14 +76,14 @@ describe('GridRenderer', () => {
     grid.getCell(1, 1).addProtein('R', 100);
     
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
     
-    const centerCell = container.querySelector('[data-x="1"][data-y="1"]');
-    const bgColor = centerCell.style.backgroundColor;
+    // Test the getCellColor method directly
+    const color = renderer.getCellColor(grid.getCell(1, 1));
     
-    // Should have red component
-    expect(bgColor).toContain('rgb');
-    expect(bgColor).toMatch(/rgb\((\d+),\s*0,\s*0\)/);
+    // With R=100, scaling factor = 255/100 = 2.55
+    // Scaled RGB = (255, 0, 0), HSL = (0°, 100%, 50%)
+    // finalL = 1 - (1 - 0.5) / 2.55 ≈ 80%
+    expect(color).toBe('hsl(0, 100%, 80%)');
   });
 
   test('should apply green color to cell with G protein', () => {
@@ -91,14 +91,14 @@ describe('GridRenderer', () => {
     grid.getCell(1, 1).addProtein('G', 100);
     
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
     
-    const centerCell = container.querySelector('[data-x="1"][data-y="1"]');
-    const bgColor = centerCell.style.backgroundColor;
+    // Test the getCellColor method directly
+    const color = renderer.getCellColor(grid.getCell(1, 1));
     
-    // Should have green component
-    expect(bgColor).toContain('rgb');
-    expect(bgColor).toMatch(/rgb\(0,\s*(\d+),\s*0\)/);
+    // With G=100, scaling factor = 255/100 = 2.55
+    // Scaled RGB = (0, 255, 0), HSL = (120°, 100%, 50%)
+    // finalL = 1 - (1 - 0.5) / 2.55 ≈ 80%
+    expect(color).toBe('hsl(120, 100%, 80%)');
   });
 
   test('should apply blue color to cell with B protein', () => {
@@ -106,14 +106,14 @@ describe('GridRenderer', () => {
     grid.getCell(1, 1).addProtein('B', 100);
     
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
     
-    const centerCell = container.querySelector('[data-x="1"][data-y="1"]');
-    const bgColor = centerCell.style.backgroundColor;
+    // Test the getCellColor method directly
+    const color = renderer.getCellColor(grid.getCell(1, 1));
     
-    // Should have blue component
-    expect(bgColor).toContain('rgb');
-    expect(bgColor).toMatch(/rgb\(0,\s*0,\s*(\d+)\)/);
+    // With B=100, scaling factor = 255/100 = 2.55
+    // Scaled RGB = (0, 0, 255), HSL = (240°, 100%, 50%)
+    // finalL = 1 - (1 - 0.5) / 2.55 ≈ 80%
+    expect(color).toBe('hsl(240, 100%, 80%)');
   });
 
   test('should mix colors for cells with multiple RGB proteins', () => {
@@ -123,18 +123,16 @@ describe('GridRenderer', () => {
     grid.getCell(1, 1).addProtein('B', 75);
     
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
     
-    const centerCell = container.querySelector('[data-x="1"][data-y="1"]');
-    const bgColor = centerCell.style.backgroundColor;
+    // Test the getCellColor method directly
+    const color = renderer.getCellColor(grid.getCell(1, 1));
     
-    // Should have all three color components
-    expect(bgColor).toContain('rgb');
-    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    // Should have HSL format with all non-zero values
+    expect(color).toContain('hsl');
+    const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
     expect(match).toBeTruthy();
-    expect(parseInt(match[1])).toBeGreaterThan(0); // R
-    expect(parseInt(match[2])).toBeGreaterThan(0); // G
-    expect(parseInt(match[3])).toBeGreaterThan(0); // B
+    expect(parseInt(match[2])).toBeGreaterThan(0); // S (saturation)
+    expect(parseInt(match[3])).toBeGreaterThan(0); // L (lightness)
   });
 
   test('should not apply color to cells without RGB proteins', () => {
@@ -142,13 +140,12 @@ describe('GridRenderer', () => {
     grid.getCell(1, 1).addProtein('X', 100); // Non-RGB protein
     
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
     
-    const centerCell = container.querySelector('[data-x="1"][data-y="1"]');
-    const bgColor = centerCell.style.backgroundColor;
+    // Test the getCellColor method directly
+    const color = renderer.getCellColor(grid.getCell(1, 1));
     
-    // Should either be empty or rgb(0, 0, 0)
-    expect(bgColor === '' || bgColor === 'rgb(0, 0, 0)' || bgColor === 'rgba(0, 0, 0, 0)').toBe(true);
+    // Cells with no RGB protein should now be white
+    expect(color).toBe('hsl(0, 0%, 100%)');
   });
 
   test('should attach click handlers to cells when enableProteinInjection is called', () => {
@@ -206,5 +203,66 @@ describe('GridRenderer', () => {
     cell.click();
     
     expect(grid.getCell(1, 1).getProteinAmount('R')).toBe(50);
+  });
+
+  // HSL algorithm specific tests
+  test('should use pure HSL lightness when scaling factor is 1 (max protein = 255)', () => {
+    const grid = new Grid(3, 3);
+    grid.getCell(1, 1).addProtein('R', 255);
+    
+    const renderer = new GridRenderer(container);
+    
+    // Test the getCellColor method directly
+    const color = renderer.getCellColor(grid.getCell(1, 1));
+    
+    // R=255, G=0, B=0: s=1, scaled=(255,0,0), HSL=(0°,100%,50%), finalL=50%
+    expect(color).toBe('hsl(0, 100%, 50%)');
+  });
+
+  test('should increase lightness toward white with intermediate scaling', () => {
+    const grid = new Grid(3, 3);
+    grid.getCell(1, 1).addProtein('R', 127);
+    
+    const renderer = new GridRenderer(container);
+    
+    // Test the getCellColor method directly
+    const color = renderer.getCellColor(grid.getCell(1, 1));
+    
+    // R=127: s ≈ 2.007, scaled=(255,0,0), HSL=(0°,100%,50%)
+    // finalL = 1 - (1 - 0.5) / 2.007 ≈ 75%
+    expect(color).toBe('hsl(0, 100%, 75%)');
+  });
+
+  test('should return white for cells with all zero RGB proteins', () => {
+    const grid = new Grid(3, 3);
+    // Cell has no RGB proteins
+    
+    const renderer = new GridRenderer(container);
+    
+    // Test the getCellColor method directly
+    const color = renderer.getCellColor(grid.getCell(1, 1));
+    
+    // R=0, G=0, B=0 → white
+    expect(color).toBe('hsl(0, 0%, 100%)');
+  });
+
+  test('should return white for cells with all equal max RGB proteins', () => {
+    const grid = new Grid(3, 3);
+    grid.getCell(1, 1).addProtein('R', 255);
+    grid.getCell(1, 1).addProtein('G', 255);
+    grid.getCell(1, 1).addProtein('B', 255);
+    
+    const renderer = new GridRenderer(container);
+    
+    // Test the getCellColor method directly
+    const color = renderer.getCellColor(grid.getCell(1, 1));
+    
+    // R=255, G=255, B=255: s=1, scaled=(255,255,255), HSL has S=0 (gray/white)
+    // Should produce white or very light gray
+    expect(color).toContain('hsl');
+    const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+    expect(match).toBeTruthy();
+    expect(parseInt(match[2])).toBe(0); // S = 0% (no saturation for white)
+    expect(parseInt(match[3])).toBeGreaterThanOrEqual(50); // High lightness
   });
 });
