@@ -44,6 +44,14 @@ class Grid {
     this.geneticCode = geneticCode;
   }
 
+  clearCells() {
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        this.cells[y][x].clearProteins();
+      }
+    }
+  }
+
   tick() {
     // Apply genetic code production first (before diffusion)
     if (this.geneticCode && this.geneticCode.genes.size > 0) {
