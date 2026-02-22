@@ -118,3 +118,8 @@ export class GeneticCode {
     return conditions;
   }
 }
+
+// CommonJS export for tests
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = GeneticCode;
+}

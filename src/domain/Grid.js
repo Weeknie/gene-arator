@@ -1,4 +1,5 @@
-import { Cell } from './Cell.js';
+import * as CellModule from './Cell.js';
+const Cell = CellModule.Cell || CellModule.default || CellModule;
 
 export class Grid {
   constructor(width, height, decayRate = 0.1, diffusionRate = 0.2) {
@@ -137,4 +138,9 @@ export class Grid {
       }
     }
   }
+}
+
+// CommonJS export for tests
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Grid;
 }

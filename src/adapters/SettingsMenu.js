@@ -23,56 +23,48 @@ export class SettingsMenu {
     panel.hidden = true;
     this.panel = panel;
 
-    // Grid size field
+    // Helper: read current values and call onApply
+    const applyCurrentSettings = () => {
+      const gridSizeInput = panel.querySelector('#settings-grid-size');
+      const diffusionRateInput = panel.querySelector('#settings-diffusion-rate');
+      const decayRateInput = panel.querySelector('#settings-decay-rate');
+
+      this.onApply({
+        gridSize: Number(gridSizeInput.value),
+        diffusionRate: Math.min(1, Math.max(0, Number(diffusionRateInput.value))),
+        decayRate: Math.min(1, Math.max(0, Number(decayRateInput.value)))
+      });
+    };
+
+    // Grid size field — apply on 'change' (when user commits the value)
     const gridSizeField = this.createField(
       'Grid Size',
       'settings-grid-size',
       'number',
       currentSettings.gridSize
     );
+    gridSizeField.querySelector('#settings-grid-size').addEventListener('change', applyCurrentSettings);
 
-    // Diffusion rate field
-    const diffusionRateField = this.createField(
+    // Diffusion rate slider + number field — apply on every 'input'
+    const diffusionRateField = this.createSliderField(
       'Diffusion Rate',
       'settings-diffusion-rate',
-      'number',
       currentSettings.diffusionRate,
-      0.01
+      applyCurrentSettings
     );
 
-    // Decay rate field
-    const decayRateField = this.createField(
+    // Decay rate slider + number field — apply on every 'input'
+    const decayRateField = this.createSliderField(
       'Decay Rate',
       'settings-decay-rate',
-      'number',
       currentSettings.decayRate,
-      0.01
+      applyCurrentSettings
     );
 
-    // Apply button
-    const applyButton = document.createElement('button');
-    applyButton.className = 'settings-apply-btn';
-    applyButton.textContent = 'Apply';
-    applyButton.addEventListener('click', () => {
-      const gridSizeInput = panel.querySelector('#settings-grid-size');
-      const diffusionRateInput = panel.querySelector('#settings-diffusion-rate');
-      const decayRateInput = panel.querySelector('#settings-decay-rate');
-
-      const newSettings = {
-        gridSize: Number(gridSizeInput.value),
-        diffusionRate: Number(diffusionRateInput.value),
-        decayRate: Number(decayRateInput.value)
-      };
-
-      this.onApply(newSettings);
-      this.close();
-    });
-
-    // Append fields to panel
+    // Append fields to panel (no Apply button)
     panel.appendChild(gridSizeField);
     panel.appendChild(diffusionRateField);
     panel.appendChild(decayRateField);
-    panel.appendChild(applyButton);
 
     // Append button and panel to wrapper
     wrapper.appendChild(button);
@@ -104,6 +96,53 @@ export class SettingsMenu {
     return field;
   }
 
+  createSliderField(label, id, value, onChange) {
+    const field = document.createElement('div');
+    field.className = 'settings-field settings-field--slider';
+
+    const labelElement = document.createElement('label');
+    labelElement.textContent = label;
+    labelElement.htmlFor = id;
+
+    const controls = document.createElement('div');
+    controls.className = 'settings-field-controls';
+
+    const slider = document.createElement('input');
+    slider.id = id + '-slider';
+    slider.type = 'range';
+    slider.min = 0;
+    slider.max = 1;
+    slider.step = 0.01;
+    slider.value = value;
+
+    const input = document.createElement('input');
+    input.id = id;
+    input.type = 'number';
+    input.min = 0;
+    input.max = 1;
+    input.step = 0.01;
+    input.value = value;
+
+    slider.addEventListener('input', () => {
+      input.value = slider.value;
+      onChange();
+    });
+
+    input.addEventListener('input', () => {
+      const clamped = Math.min(1, Math.max(0, Number(input.value)));
+      slider.value = clamped;
+      onChange();
+    });
+
+    controls.appendChild(slider);
+    controls.appendChild(input);
+
+    field.appendChild(labelElement);
+    field.appendChild(controls);
+
+    return field;
+  }
+
   toggle() {
     if (this.isOpen) {
       this.close();
@@ -125,4 +164,9 @@ export class SettingsMenu {
       this.isOpen = false;
     }
   }
+}
+
+// CommonJS export for tests
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = SettingsMenu;
 }

@@ -116,6 +116,31 @@ h1 {
     font-size: 0.9rem;
 }
 
+.settings-field--slider {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.settings-field-controls {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.settings-field-controls input[type="range"] {
+    flex: 1;
+}
+
+.settings-field-controls input[type="number"] {
+    width: 60px;
+    padding: 4px 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
 .settings-apply-btn {
     width: 100%;
     padding: 8px 16px;

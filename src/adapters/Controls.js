@@ -1,4 +1,5 @@
-import { GeneticCode } from '../domain/GeneticCode.js';
+import * as GeneticCodeModule from '../domain/GeneticCode.js';
+const GeneticCode = GeneticCodeModule.GeneticCode || GeneticCodeModule.default || GeneticCodeModule;
 
 export function createControls(renderer, grid) {
   const controlsDiv = document.createElement('div');
@@ -131,4 +132,9 @@ export function createControls(renderer, grid) {
   controlsDiv.appendChild(codeDiv);
   
   document.getElementById('game-container').parentElement.appendChild(controlsDiv);
+}
+
+// CommonJS export for tests
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = createControls;
 }
