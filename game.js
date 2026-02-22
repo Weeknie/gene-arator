@@ -60,33 +60,35 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Create settings menu
   const settingsContainer = document.querySelector('.container');
+  let currentGridSize = DEFAULT_GRID_SIZE;
   const settingsMenu = new SettingsMenu(settingsContainer, (newSettings) => {
-    // Stop the simulation if running
-    if (isRunning) {
-      isRunning = false;
-      clearInterval(intervalId);
-      document.getElementById('start-btn').textContent = 'Start';
+    // Apply diffusion and decay rate in-place (no stop, no clear)
+    grid.diffusionRate = newSettings.diffusionRate;
+    grid.decayRate = newSettings.decayRate;
+
+    // Only recreate grid when size actually changes
+    if (newSettings.gridSize !== currentGridSize && newSettings.gridSize > 0) {
+      currentGridSize = newSettings.gridSize;
+
+      grid = new Grid(
+        newSettings.gridSize,
+        newSettings.gridSize,
+        newSettings.decayRate,
+        newSettings.diffusionRate
+      );
+
+      // Set genetic code from the standalone input
+      const codeTextarea = document.getElementById('genetic-code-input');
+      grid.setGeneticCode(new GeneticCode(codeTextarea ? codeTextarea.value : ''));
+
+      // Re-render
+      renderer.render(grid);
+
+      // Re-enable protein injection
+      renderer.enableProteinInjection(grid, renderer.selectedProtein, 255);
     }
-    
-    // Create new grid with new settings
-    grid = new Grid(
-      newSettings.gridSize,
-      newSettings.gridSize,
-      newSettings.decayRate,
-      newSettings.diffusionRate
-    );
-    
-    // Set genetic code from the standalone input
-    const codeTextarea = document.getElementById('genetic-code-input');
-    grid.setGeneticCode(new GeneticCode(codeTextarea ? codeTextarea.value : ''));
-    
-    // Re-render
-    renderer.render(grid);
-    
-    // Re-enable protein injection
-    renderer.enableProteinInjection(grid, renderer.selectedProtein, 255);
   });
-  
+
   // Render settings menu with default values
   settingsMenu.render({
     gridSize: DEFAULT_GRID_SIZE,

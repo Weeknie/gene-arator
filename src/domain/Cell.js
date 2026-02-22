@@ -25,3 +25,8 @@ export class Cell {
     }
   }
 }
+
+// CommonJS export for tests
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Cell;
+}

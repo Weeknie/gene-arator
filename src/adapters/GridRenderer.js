@@ -149,3 +149,8 @@ export class GridRenderer {
     this.container.appendChild(gridElement);
   }
 }
+
+// CommonJS export for tests
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = GridRenderer;
+}

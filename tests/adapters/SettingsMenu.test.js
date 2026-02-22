@@ -91,41 +91,114 @@ describe('SettingsMenu', () => {
   });
 
 
-  test('should call onApply with correct parsed values when apply button is clicked', () => {
+  test('should not render an apply button', () => {
+    const settingsMenu = new SettingsMenu(container, onApply);
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    
+    const applyButton = container.querySelector('.settings-apply-btn');
+    expect(applyButton).toBeFalsy();
+  });
+
+  test('should call onApply when grid size input changes', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
     settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
     
     const gridSizeInput = container.querySelector('#settings-grid-size');
-    const diffusionRateInput = container.querySelector('#settings-diffusion-rate');
-    const decayRateInput = container.querySelector('#settings-decay-rate');
-    const applyButton = container.querySelector('.settings-apply-btn');
-    
     gridSizeInput.value = '30';
-    diffusionRateInput.value = '0.3';
-    decayRateInput.value = '0.15';
     
-    applyButton.click();
+    // Trigger change event
+    const event = new Event('change', { bubbles: true });
+    gridSizeInput.dispatchEvent(event);
     
     expect(onApply).toHaveBeenCalledWith({
       gridSize: 30,
-      diffusionRate: 0.3,
-      decayRate: 0.15
+      diffusionRate: 0.2,
+      decayRate: 0.1
     });
   });
 
-  test('should close panel after apply button is clicked', () => {
+  test('should call onApply when diffusion rate input changes', () => {
     const settingsMenu = new SettingsMenu(container, onApply);
     settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
     
-    const button = container.querySelector('.settings-btn');
-    const panel = container.querySelector('.settings-panel');
-    const applyButton = container.querySelector('.settings-apply-btn');
+    const diffusionRateInput = container.querySelector('#settings-diffusion-rate');
+    diffusionRateInput.value = '0.5';
     
-    button.click();
-    expect(panel.hidden).toBe(false);
+    // Trigger input event
+    const event = new Event('input', { bubbles: true });
+    diffusionRateInput.dispatchEvent(event);
     
-    applyButton.click();
-    expect(panel.hidden).toBe(true);
+    expect(onApply).toHaveBeenCalledWith({
+      gridSize: 20,
+      diffusionRate: 0.5,
+      decayRate: 0.1
+    });
+  });
+
+  test('should call onApply when decay rate input changes', () => {
+    const settingsMenu = new SettingsMenu(container, onApply);
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    
+    const decayRateInput = container.querySelector('#settings-decay-rate');
+    decayRateInput.value = '0.3';
+    
+    // Trigger input event
+    const event = new Event('input', { bubbles: true });
+    decayRateInput.dispatchEvent(event);
+    
+    expect(onApply).toHaveBeenCalledWith({
+      gridSize: 20,
+      diffusionRate: 0.2,
+      decayRate: 0.3
+    });
+  });
+
+  test('should render diffusion rate slider with id settings-diffusion-rate-slider', () => {
+    const settingsMenu = new SettingsMenu(container, onApply);
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    
+    const slider = container.querySelector('#settings-diffusion-rate-slider');
+    expect(slider).toBeTruthy();
+    expect(slider.type).toBe('range');
+    expect(slider.value).toBe('0.2');
+  });
+
+  test('should render decay rate slider with id settings-decay-rate-slider', () => {
+    const settingsMenu = new SettingsMenu(container, onApply);
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    
+    const slider = container.querySelector('#settings-decay-rate-slider');
+    expect(slider).toBeTruthy();
+    expect(slider.type).toBe('range');
+    expect(slider.value).toBe('0.1');
+  });
+
+  test('should sync slider value to number input when slider changes', () => {
+    const settingsMenu = new SettingsMenu(container, onApply);
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    
+    const slider = container.querySelector('#settings-diffusion-rate-slider');
+    const input = container.querySelector('#settings-diffusion-rate');
+    
+    slider.value = '0.7';
+    const event = new Event('input', { bubbles: true });
+    slider.dispatchEvent(event);
+    
+    expect(input.value).toBe('0.7');
+  });
+
+  test('should sync number input value to slider when number input changes', () => {
+    const settingsMenu = new SettingsMenu(container, onApply);
+    settingsMenu.render({ gridSize: 20, diffusionRate: 0.2, decayRate: 0.1 });
+    
+    const slider = container.querySelector('#settings-decay-rate-slider');
+    const input = container.querySelector('#settings-decay-rate');
+    
+    input.value = '0.8';
+    const event = new Event('input', { bubbles: true });
+    input.dispatchEvent(event);
+    
+    expect(slider.value).toBe('0.8');
   });
 
   test('should open panel when open method is called', () => {
