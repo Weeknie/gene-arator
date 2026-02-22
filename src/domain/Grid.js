@@ -1,9 +1,6 @@
-/* global Cell */
-if (typeof module !== 'undefined') {
-  var Cell = require('./Cell');
-}
+import { Cell } from './Cell.js';
 
-class Grid {
+export class Grid {
   constructor(width, height, decayRate = 0.1, diffusionRate = 0.2) {
     this.width = width;
     this.height = height;
@@ -141,6 +138,3 @@ class Grid {
     }
   }
 }
-
-if (typeof module !== 'undefined') module.exports = Grid;
-if (typeof window !== 'undefined') window.Grid = Grid;

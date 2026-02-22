@@ -1,4 +1,4 @@
-class SettingsMenu {
+export class SettingsMenu {
   constructor(container, onApply) {
     this.container = container;
     this.onApply = onApply;
@@ -126,6 +126,3 @@ class SettingsMenu {
     }
   }
 }
-
-if (typeof module !== 'undefined') module.exports = SettingsMenu;
-if (typeof window !== 'undefined') window.SettingsMenu = SettingsMenu;

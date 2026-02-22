@@ -1,4 +1,4 @@
-class GridRenderer {
+export class GridRenderer {
   constructor(container) {
     this.container = container;
     this.selectedProtein = 'R';
@@ -84,7 +84,7 @@ class GridRenderer {
     return `hsl(${Math.round(H)}, ${Math.round(S * 100)}%, ${Math.round(finalL * 100)}%)`;
   }
 
-  enableProteinInjection(grid, proteinType = 'R', amount = 100) {
+  enableProteinInjection(grid, proteinType = 'R', amount = 255) {
     this.grid = grid;
     this.selectedProtein = proteinType;
     this.injectionAmount = amount;
@@ -149,6 +149,3 @@ class GridRenderer {
     this.container.appendChild(gridElement);
   }
 }
-
-if (typeof module !== 'undefined') module.exports = GridRenderer;
-if (typeof window !== 'undefined') window.GridRenderer = GridRenderer;

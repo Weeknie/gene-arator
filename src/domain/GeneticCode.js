@@ -1,4 +1,4 @@
-class GeneticCode {
+export class GeneticCode {
   constructor(code) {
     this.genes = new Map();
     this.conditionalGenes = [];
@@ -118,6 +118,3 @@ class GeneticCode {
     return conditions;
   }
 }
-
-if (typeof module !== 'undefined') module.exports = GeneticCode;
-if (typeof window !== 'undefined') window.GeneticCode = GeneticCode;

@@ -1,9 +1,6 @@
-/* global GeneticCode */
-if (typeof module !== 'undefined') {
-  var GeneticCode = require('../domain/GeneticCode');
-}
+import { GeneticCode } from '../domain/GeneticCode.js';
 
-function createControls(renderer, grid) {
+export function createControls(renderer, grid) {
   const controlsDiv = document.createElement('div');
   controlsDiv.id = 'controls';
   controlsDiv.style.marginTop = '20px';
@@ -135,6 +132,3 @@ function createControls(renderer, grid) {
   
   document.getElementById('game-container').parentElement.appendChild(controlsDiv);
 }
-
-if (typeof module !== 'undefined') module.exports = createControls;
-if (typeof window !== 'undefined') window.createControls = createControls;

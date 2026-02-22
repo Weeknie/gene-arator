@@ -1,3 +1,9 @@
+import { Grid } from './src/domain/Grid.js';
+import { GridRenderer } from './src/adapters/GridRenderer.js';
+import { GeneticCode } from './src/domain/GeneticCode.js';
+import { SettingsMenu } from './src/adapters/SettingsMenu.js';
+import { createControls } from './src/adapters/Controls.js';
+
 // Initialize the game when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   // Default grid settings

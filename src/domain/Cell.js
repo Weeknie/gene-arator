@@ -1,4 +1,4 @@
-class Cell {
+export class Cell {
   constructor(x, y) {
     this.x = x;
     this.y = y;
@@ -25,6 +25,3 @@ class Cell {
     }
   }
 }
-
-if (typeof module !== 'undefined') module.exports = Cell;
-if (typeof window !== 'undefined') window.Cell = Cell;
