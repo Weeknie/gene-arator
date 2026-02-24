@@ -1,23 +1,11 @@
 export const presets = [
   {
-    name: 'Rainbow Cycle',
+    name: 'Rainbow cycle',
     code: 'R+25;(R>200)->G+25;(G>200)->B+25;(B>200)->R-25'
   },
   {
-    name: 'Red Spread',
-    code: 'R+10'
-  },
-  {
-    name: 'Green Wave',
-    code: 'G+15;(G>100)->R+5'
-  },
-  {
-    name: 'Blue Pulse',
-    code: 'B+20;(B>150)->B-10'
-  },
-  {
-    name: 'RGB Balance',
-    code: 'R+5;G+5;B+5'
+    name: 'Self sustaining cells',
+    code: 'R-25;G-25;B-25;(R>50)->R+100;(G>50)->G+100;(B>50)->B+100'
   }
 ];
 
