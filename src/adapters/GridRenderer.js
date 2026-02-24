@@ -117,7 +117,7 @@ export class GridRenderer {
     const expectedCount = grid.width * grid.height;
 
     if (existingCells.length === expectedCount) {
-      // In-place update: just change colours
+      // In-place update: just change colors
       let i = 0;
       for (let y = 0; y < grid.height; y++) {
         for (let x = 0; x < grid.width; x++) {
