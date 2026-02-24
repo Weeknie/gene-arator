@@ -1,6 +1,19 @@
 import * as GeneticCodeModule from '../domain/GeneticCode.js';
 const GeneticCode = GeneticCodeModule.GeneticCode || GeneticCodeModule.default || GeneticCodeModule;
 
+const BTN_STYLE = {
+  padding: '8px 16px',
+  fontSize: '14px',
+  cursor: 'pointer',
+  border: '1px solid #333',
+  borderRadius: '4px',
+  backgroundColor: '#f5f5f5',
+};
+
+function applyBtnStyle(btn) {
+  Object.assign(btn.style, BTN_STYLE);
+}
+
 export function createControls(renderer, grid) {
   const controlsDiv = document.createElement('div');
   controlsDiv.id = 'controls';
@@ -8,16 +21,50 @@ export function createControls(renderer, grid) {
   controlsDiv.style.display = 'flex';
   controlsDiv.style.flexDirection = 'column';
   controlsDiv.style.gap = '10px';
-  controlsDiv.style.alignItems = 'center';
-  
+  controlsDiv.style.width = '100%';
+
+  // --- Buttons row: [Apply Code] | divider | [Start/Pause] [Clear] ---
+  const buttonsRow = document.createElement('div');
+  buttonsRow.style.display = 'flex';
+  buttonsRow.style.alignItems = 'center';
+  buttonsRow.style.gap = '8px';
+
+  // Apply Code button (left side)
+  const applyCodeBtn = document.createElement('button');
+  applyCodeBtn.textContent = 'Apply Code';
+  applyBtnStyle(applyCodeBtn);
+
+  buttonsRow.appendChild(applyCodeBtn);
+
+  // Visual divider
+  const divider = document.createElement('span');
+  divider.style.display = 'inline-block';
+  divider.style.width = '1px';
+  divider.style.height = '24px';
+  divider.style.backgroundColor = '#ccc';
+  divider.style.margin = '0 4px';
+  divider.setAttribute('aria-hidden', 'true');
+  buttonsRow.appendChild(divider);
+
   // Start/Pause button
   const startBtn = document.createElement('button');
   startBtn.id = 'start-btn';
   startBtn.textContent = 'Start';
-  startBtn.style.padding = '10px 20px';
-  startBtn.style.fontSize = '16px';
-  startBtn.style.cursor = 'pointer';
-  controlsDiv.appendChild(startBtn);
+  applyBtnStyle(startBtn);
+  buttonsRow.appendChild(startBtn);
+
+  // Clear button
+  const clearBtn = document.createElement('button');
+  clearBtn.id = 'clear-btn';
+  clearBtn.textContent = 'Clear';
+  applyBtnStyle(clearBtn);
+  clearBtn.addEventListener('click', () => {
+    renderer.grid.clearCells();
+    renderer.render(renderer.grid);
+  });
+  buttonsRow.appendChild(clearBtn);
+
+  controlsDiv.appendChild(buttonsRow);
   
   // Protein selector
   const proteinDiv = document.createElement('div');
@@ -46,42 +93,39 @@ export function createControls(renderer, grid) {
   
   controlsDiv.appendChild(proteinDiv);
   
-  // Genetic code textarea
+  // Genetic code section (full width)
   const codeDiv = document.createElement('div');
   codeDiv.style.display = 'flex';
-  codeDiv.style.gap = '10px';
-  codeDiv.style.alignItems = 'flex-start';
-  
+  codeDiv.style.flexDirection = 'column';
+  codeDiv.style.gap = '4px';
+  codeDiv.style.width = '100%';
+
   const codeLabel = document.createElement('label');
   codeLabel.textContent = 'Genetic Code: ';
   codeLabel.style.fontWeight = 'bold';
   codeLabel.htmlFor = 'genetic-code-input';
   codeDiv.appendChild(codeLabel);
-  
+
   const codeTextarea = document.createElement('textarea');
   codeTextarea.id = 'genetic-code-input';
   codeTextarea.rows = 8;
-  codeTextarea.style.width = '300px';
+  codeTextarea.style.width = '100%';
   codeTextarea.placeholder = 'e.g. R+10;G+5';
   const savedCode = typeof localStorage !== 'undefined' ? localStorage.getItem('geneticCode') : null;
   if (savedCode) {
     codeTextarea.value = savedCode;
   }
   codeDiv.appendChild(codeTextarea);
-  
+
   const errorMessageDiv = document.createElement('div');
   errorMessageDiv.style.color = 'red';
   errorMessageDiv.style.fontSize = '12px';
-  errorMessageDiv.style.marginTop = '5px';
   errorMessageDiv.style.display = 'none';
   errorMessageDiv.setAttribute('role', 'alert');
   errorMessageDiv.setAttribute('aria-live', 'assertive');
   codeDiv.appendChild(errorMessageDiv);
-  
-  const applyCodeBtn = document.createElement('button');
-  applyCodeBtn.textContent = 'Apply Code';
-  applyCodeBtn.style.padding = '6px 12px';
-  applyCodeBtn.style.cursor = 'pointer';
+
+  // Wire up Apply Code button (created in buttonsRow above)
   applyCodeBtn.addEventListener('click', () => {
     try {
       errorMessageDiv.textContent = '';
@@ -95,19 +139,7 @@ export function createControls(renderer, grid) {
       errorMessageDiv.style.display = 'block';
     }
   });
-  codeDiv.appendChild(applyCodeBtn);
-  
-  const clearBtn = document.createElement('button');
-  clearBtn.id = 'clear-btn';
-  clearBtn.textContent = 'Clear';
-  clearBtn.style.padding = '6px 12px';
-  clearBtn.style.cursor = 'pointer';
-  clearBtn.addEventListener('click', () => {
-    renderer.grid.clearCells();
-    renderer.render(renderer.grid);
-  });
-  codeDiv.appendChild(clearBtn);
-  
+
   controlsDiv.appendChild(codeDiv);
   
   document.querySelector('.container').appendChild(controlsDiv);
