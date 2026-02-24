@@ -197,4 +197,12 @@ describe('GeneticCode', () => {
     expect(geneticCode.genes.get('G')).toBe(5);
     expect(geneticCode.genes.get('B')).toBe(2);
   });
+
+  test('should parse multiple genes separated by newlines', () => {
+    const geneticCode = new GeneticCode('A+2\nB+0.5');
+
+    expect(geneticCode.genes.size).toBe(2);
+    expect(geneticCode.genes.get('A')).toBe(2);
+    expect(geneticCode.genes.get('B')).toBe(0.5);
+  });
 });

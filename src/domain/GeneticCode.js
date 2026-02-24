@@ -12,7 +12,7 @@ export class GeneticCode {
     }
 
     // Split by semicolon
-    const tokens = code.split(';');
+    const tokens = code.split(/[;\n]/);
     let tokenIndex = 0;
 
     for (const token of tokens) {
