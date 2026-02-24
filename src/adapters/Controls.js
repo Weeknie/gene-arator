@@ -73,7 +73,7 @@ export function createControls(renderer, grid) {
   proteinDiv.style.alignItems = 'center';
   
   const proteinLabel = document.createElement('label');
-  proteinLabel.textContent = 'Protein: ';
+  proteinLabel.textContent = 'Protein to inject: ';
   proteinLabel.style.fontWeight = 'bold';
   proteinDiv.appendChild(proteinLabel);
   
@@ -90,19 +90,6 @@ export function createControls(renderer, grid) {
     renderer.setSelectedProtein(proteinInput.value);
   });
   proteinDiv.appendChild(proteinInput);
-
-  const injectBtn = document.createElement('button');
-  injectBtn.textContent = 'Inject';
-  injectBtn.style.padding = '8px 16px';
-  injectBtn.style.cursor = 'pointer';
-  injectBtn.style.border = '2px solid #000';
-  injectBtn.style.borderRadius = '4px';
-  injectBtn.style.backgroundColor = '#ffcccc';
-  injectBtn.style.fontWeight = 'bold';
-  injectBtn.addEventListener('click', () => {
-    renderer.setSelectedProtein(proteinInput.value);
-  });
-  proteinDiv.appendChild(injectBtn);
   
   controlsDiv.appendChild(proteinDiv);
   

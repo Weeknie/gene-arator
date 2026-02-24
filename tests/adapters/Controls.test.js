@@ -121,22 +121,20 @@ describe('createControls', () => {
     expect(buttonTexts).not.toContain('B');
   });
 
-  test('clicking the inject button calls renderer.setSelectedProtein with the text input value', () => {
-    renderer.setSelectedProtein = jest.fn();
+  test('inject button does not exist and label says "Protein to inject"', () => {
     createControls(renderer, grid);
 
-    const input = document.getElementById('protein-input');
-    input.value = 'myProtein';
-
-    // Find the inject/R button (red button next to the input)
+    // No button with red/pink background should exist
     const allButtons = document.querySelectorAll('button');
     const injectBtn = Array.from(allButtons).find(
       b => b.style.backgroundColor === 'rgb(255, 204, 204)' || b.style.backgroundColor === '#ffcccc'
     );
-    expect(injectBtn).toBeTruthy();
-    injectBtn.click();
+    expect(injectBtn).toBeUndefined();
 
-    expect(renderer.setSelectedProtein).toHaveBeenCalledWith('myProtein');
+    // Label should say "Protein to inject"
+    const allLabels = document.querySelectorAll('label');
+    const proteinLabel = Array.from(allLabels).find(l => l.textContent.includes('Protein to inject'));
+    expect(proteinLabel).toBeTruthy();
   });
 
   test('changing the text input calls renderer.setSelectedProtein with the new value', () => {
