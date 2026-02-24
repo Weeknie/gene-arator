@@ -16,11 +16,16 @@ describe('createControls', () => {
   let container;
   let renderer;
   let grid;
+  let containerWrapper;
 
   beforeEach(() => {
+    containerWrapper = document.createElement('div');
+    containerWrapper.className = 'container';
+    document.body.appendChild(containerWrapper);
+
     container = document.createElement('div');
     container.id = 'game-container';
-    document.body.appendChild(container);
+    containerWrapper.appendChild(container);
 
     grid = new Grid(5, 5);
     renderer = new GridRenderer(container);
@@ -31,11 +36,7 @@ describe('createControls', () => {
   });
 
   afterEach(() => {
-    document.body.removeChild(container);
-    const controlsDiv = document.getElementById('controls');
-    if (controlsDiv) {
-      controlsDiv.parentElement.removeChild(controlsDiv);
-    }
+    document.body.removeChild(containerWrapper);
     localStorage.clear();
   });
 

@@ -131,7 +131,7 @@ export function createControls(renderer, grid) {
   
   controlsDiv.appendChild(codeDiv);
   
-  document.getElementById('game-container').parentElement.appendChild(controlsDiv);
+  document.querySelector('.container').appendChild(controlsDiv);
 }
 
 // CommonJS export for tests

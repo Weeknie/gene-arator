@@ -55,7 +55,55 @@ h1 {
     cursor: pointer;
 }
 
-/* Settings Menu Styles */
+/* Game Layout (presets + grid side by side) */
+.game-layout {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
+    justify-content: center;
+}
+
+/* Presets Panel */
+#presets-panel {
+    min-width: 140px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    text-align: left;
+}
+
+.presets-heading {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #ccc;
+}
+
+.presets-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.presets-item {
+    padding: 7px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #333;
+    transition: background-color 0.15s;
+    margin-bottom: 4px;
+}
+
+.presets-item:hover {
+    background-color: #e8f0fe;
+    color: #1a73e8;
+}
+
+
 .settings-wrapper {
     position: absolute;
     top: 20px;

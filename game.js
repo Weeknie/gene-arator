@@ -3,6 +3,8 @@ import { GridRenderer } from './src/adapters/GridRenderer.js';
 import { GeneticCode } from './src/domain/GeneticCode.js';
 import { SettingsMenu } from './src/adapters/SettingsMenu.js';
 import { createControls } from './src/adapters/Controls.js';
+import { Presets } from './src/adapters/Presets.js';
+import { presets } from './src/presets.js';
 
 // Initialize the game when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -23,6 +25,22 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Add UI controls
   createControls(renderer, grid);
+
+  // Initialize presets panel
+  const presetsPanel = document.getElementById('presets-panel');
+  const presetsComponent = new Presets(presetsPanel, presets, (code) => {
+    const codeTextarea = document.getElementById('genetic-code-input');
+    if (codeTextarea) {
+      codeTextarea.value = code;
+    }
+    grid.clearCells();
+    grid.setGeneticCode(new GeneticCode(code));
+    renderer.render(grid);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('geneticCode', code);
+    }
+  });
+  presetsComponent.render();
   
   // Apply saved genetic code if present
   const savedCode = typeof localStorage !== 'undefined' ? localStorage.getItem('geneticCode') : null;
