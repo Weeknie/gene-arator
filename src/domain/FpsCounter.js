@@ -16,7 +16,8 @@ export class FpsCounter {
 
   _prune(now) {
     const cutoff = now - this.windowMs;
-    this.timestamps = this.timestamps.filter(t => t > cutoff);
+    const firstValid = this.timestamps.findIndex(t => t > cutoff);
+    this.timestamps = firstValid === -1 ? [] : this.timestamps.slice(firstValid);
   }
 }
 

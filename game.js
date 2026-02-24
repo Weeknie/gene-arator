@@ -22,7 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const renderer = new GridRenderer(container);
 
   const fpsCounter = new FpsCounter();
-  const fpsDisplay = new FpsDisplay(document.querySelector('.container'));
+  const appContainer = document.querySelector('.container');
+  const fpsDisplay = new FpsDisplay(appContainer);
   fpsDisplay.render();
   
   // Initial render
