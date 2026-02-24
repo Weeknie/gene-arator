@@ -30,40 +30,32 @@ export function createControls(renderer, grid) {
   proteinLabel.style.fontWeight = 'bold';
   proteinDiv.appendChild(proteinLabel);
   
-  ['R', 'G', 'B'].forEach(protein => {
-    const btn = document.createElement('button');
-    btn.textContent = protein;
-    btn.style.padding = '8px 16px';
-    btn.style.cursor = 'pointer';
-    btn.style.border = '2px solid #333';
-    btn.style.borderRadius = '4px';
-    
-    if (protein === 'R') {
-      btn.style.backgroundColor = '#ffcccc';
-      btn.style.fontWeight = 'bold';
-    } else if (protein === 'G') {
-      btn.style.backgroundColor = '#ccffcc';
-    } else {
-      btn.style.backgroundColor = '#ccccff';
-    }
-    
-    btn.addEventListener('click', () => {
-      renderer.setSelectedProtein(protein);
-      // Update all buttons to show selection
-      proteinDiv.querySelectorAll('button').forEach(b => {
-        b.style.fontWeight = 'normal';
-        b.style.border = '2px solid #333';
-      });
-      btn.style.fontWeight = 'bold';
-      btn.style.border = '2px solid #000';
-    });
-    
-    if (protein === 'R') {
-      btn.style.border = '2px solid #000';
-    }
-    
-    proteinDiv.appendChild(btn);
+  const proteinInput = document.createElement('input');
+  proteinInput.type = 'text';
+  proteinInput.id = 'protein-input';
+  proteinInput.value = 'R';
+  proteinInput.style.padding = '6px 8px';
+  proteinInput.style.fontSize = '14px';
+  proteinInput.style.width = '100px';
+  proteinInput.style.borderRadius = '4px';
+  proteinInput.style.border = '1px solid #333';
+  proteinInput.addEventListener('input', () => {
+    renderer.setSelectedProtein(proteinInput.value);
   });
+  proteinDiv.appendChild(proteinInput);
+
+  const injectBtn = document.createElement('button');
+  injectBtn.textContent = 'Inject';
+  injectBtn.style.padding = '8px 16px';
+  injectBtn.style.cursor = 'pointer';
+  injectBtn.style.border = '2px solid #000';
+  injectBtn.style.borderRadius = '4px';
+  injectBtn.style.backgroundColor = '#ffcccc';
+  injectBtn.style.fontWeight = 'bold';
+  injectBtn.addEventListener('click', () => {
+    renderer.setSelectedProtein(proteinInput.value);
+  });
+  proteinDiv.appendChild(injectBtn);
   
   controlsDiv.appendChild(proteinDiv);
   

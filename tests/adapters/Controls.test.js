@@ -104,4 +104,49 @@ describe('createControls', () => {
     const textarea = document.getElementById('genetic-code-input');
     expect(textarea.rows).toBeGreaterThanOrEqual(8);
   });
+    
+  test('should render a protein-input text field with default value "R"', () => {
+    createControls(renderer, grid);
+    const input = document.getElementById('protein-input');
+    expect(input).toBeTruthy();
+    expect(input.tagName.toLowerCase()).toBe('input');
+    expect(input.value).toBe('R');
+  });
+
+  test('should not render G or B protein buttons', () => {
+    createControls(renderer, grid);
+    const allButtons = document.querySelectorAll('button');
+    const buttonTexts = Array.from(allButtons).map(b => b.textContent);
+    expect(buttonTexts).not.toContain('G');
+    expect(buttonTexts).not.toContain('B');
+  });
+
+  test('clicking the inject button calls renderer.setSelectedProtein with the text input value', () => {
+    renderer.setSelectedProtein = jest.fn();
+    createControls(renderer, grid);
+
+    const input = document.getElementById('protein-input');
+    input.value = 'myProtein';
+
+    // Find the inject/R button (red button next to the input)
+    const allButtons = document.querySelectorAll('button');
+    const injectBtn = Array.from(allButtons).find(
+      b => b.style.backgroundColor === 'rgb(255, 204, 204)' || b.style.backgroundColor === '#ffcccc'
+    );
+    expect(injectBtn).toBeTruthy();
+    injectBtn.click();
+
+    expect(renderer.setSelectedProtein).toHaveBeenCalledWith('myProtein');
+  });
+
+  test('changing the text input calls renderer.setSelectedProtein with the new value', () => {
+    renderer.setSelectedProtein = jest.fn();
+    createControls(renderer, grid);
+
+    const input = document.getElementById('protein-input');
+    input.value = 'newProtein';
+    input.dispatchEvent(new Event('input'));
+
+    expect(renderer.setSelectedProtein).toHaveBeenCalledWith('newProtein');
+  });
 });

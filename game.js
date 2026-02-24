@@ -5,6 +5,8 @@ import { SettingsMenu } from './src/adapters/SettingsMenu.js';
 import { createControls } from './src/adapters/Controls.js';
 import { Presets } from './src/adapters/Presets.js';
 import { presets } from './src/presets.js';
+import { FpsCounter } from './src/domain/FpsCounter.js';
+import { FpsDisplay } from './src/adapters/FpsDisplay.js';
 
 // Initialize the game when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -18,6 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let grid = new Grid(DEFAULT_GRID_SIZE, DEFAULT_GRID_SIZE, DEFAULT_DECAY_RATE, DEFAULT_DIFFUSION_RATE);
   grid.setGeneticCode(new GeneticCode(DEFAULT_GENETIC_CODE));
   const renderer = new GridRenderer(container);
+
+  const fpsCounter = new FpsCounter();
+  const appContainer = document.querySelector('.container');
+  const fpsDisplay = new FpsDisplay(appContainer);
+  fpsDisplay.render();
   
   // Initial render
   renderer.buildGrid(grid);
@@ -62,6 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
       intervalId = setInterval(() => {
         grid.tick();
         renderer.render(grid);
+        fpsCounter.tick();
+        fpsDisplay.update(fpsCounter.getFps());
       }, 100);
       document.getElementById('start-btn').textContent = 'Pause';
     } else {
