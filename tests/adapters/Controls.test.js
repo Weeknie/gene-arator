@@ -29,7 +29,7 @@ describe('createControls', () => {
 
     grid = new Grid(5, 5);
     renderer = new GridRenderer(container);
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     renderer.enableProteinInjection(grid, 'R', 100);
 
     localStorage.clear();

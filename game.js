@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const renderer = new GridRenderer(container);
   
   // Initial render
-  renderer.render(grid);
+  renderer.buildGrid(grid);
   renderer.enableProteinInjection(grid, 'R', 255);
   
   // Add UI controls
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
       grid.setGeneticCode(new GeneticCode(codeTextarea ? codeTextarea.value : ''));
 
       // Re-render
-      renderer.render(grid);
+      renderer.buildGrid(grid);
 
       // Re-enable protein injection
       renderer.enableProteinInjection(grid, renderer.selectedProtein, 255);

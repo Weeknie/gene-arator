@@ -112,26 +112,11 @@ export class GridRenderer {
     this.injectionAmount = amount;
   }
 
-  render(grid) {
-    const existingCells = this.container.querySelectorAll('.grid-cell');
-    const expectedCount = grid.width * grid.height;
-
-    if (existingCells.length === expectedCount) {
-      // In-place update: just change colors
-      let i = 0;
-      for (let y = 0; y < grid.height; y++) {
-        for (let x = 0; x < grid.width; x++) {
-          existingCells[i].style.backgroundColor = this.getCellColor(grid.getCell(x, y));
-          i++;
-        }
-      }
-      return;
-    }
-
-    // Full rebuild (first render or grid size changed)
+  buildGrid(grid) {
     this.container.innerHTML = '';
     const gridElement = document.createElement('div');
     gridElement.className = 'grid';
+    this.cellElements = [];
     for (let y = 0; y < grid.height; y++) {
       const rowElement = document.createElement('div');
       rowElement.className = 'grid-row';
@@ -143,10 +128,21 @@ export class GridRenderer {
         cellElement.dataset.y = cell.y;
         cellElement.style.backgroundColor = this.getCellColor(cell);
         rowElement.appendChild(cellElement);
+        this.cellElements.push(cellElement);
       }
       gridElement.appendChild(rowElement);
     }
     this.container.appendChild(gridElement);
+  }
+
+  render(grid) {
+    let i = 0;
+    for (let y = 0; y < grid.height; y++) {
+      for (let x = 0; x < grid.width; x++) {
+        this.cellElements[i].style.backgroundColor = this.getCellColor(grid.getCell(x, y));
+        i++;
+      }
+    }
   }
 }
 

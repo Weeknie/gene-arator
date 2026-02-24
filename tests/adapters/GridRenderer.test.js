@@ -23,7 +23,7 @@ describe('GridRenderer', () => {
     const grid = new Grid(10, 10);
     const renderer = new GridRenderer(container);
     
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     const gridElement = container.querySelector('.grid');
     expect(gridElement).toBeTruthy();
@@ -33,7 +33,7 @@ describe('GridRenderer', () => {
     const grid = new Grid(10, 10);
     const renderer = new GridRenderer(container);
     
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     const rows = container.querySelectorAll('.grid-row');
     expect(rows.length).toBe(10);
@@ -43,7 +43,7 @@ describe('GridRenderer', () => {
     const grid = new Grid(10, 10);
     const renderer = new GridRenderer(container);
     
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     const firstRow = container.querySelector('.grid-row');
     const cells = firstRow.querySelectorAll('.grid-cell');
@@ -54,7 +54,7 @@ describe('GridRenderer', () => {
     const grid = new Grid(10, 10);
     const renderer = new GridRenderer(container);
     
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     const cellElement = container.querySelector('.grid-cell');
     expect(cellElement.dataset.x).toBe('0');
@@ -65,7 +65,7 @@ describe('GridRenderer', () => {
     const grid = new Grid(10, 10);
     const renderer = new GridRenderer(container);
     
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     const allCells = container.querySelectorAll('.grid-cell');
     expect(allCells.length).toBe(100);
@@ -151,7 +151,7 @@ describe('GridRenderer', () => {
   test('should attach click handlers to cells when enableProteinInjection is called', () => {
     const grid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     renderer.enableProteinInjection(grid, 'R', 100);
     
@@ -165,7 +165,7 @@ describe('GridRenderer', () => {
   test('should add protein when cell is clicked', () => {
     const grid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     renderer.enableProteinInjection(grid, 'G', 50);
     
@@ -178,7 +178,7 @@ describe('GridRenderer', () => {
   test('should update selected protein type', () => {
     const grid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     renderer.enableProteinInjection(grid, 'R', 100);
     renderer.setSelectedProtein('B');
@@ -194,7 +194,7 @@ describe('GridRenderer', () => {
   test('should update injection amount', () => {
     const grid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     renderer.enableProteinInjection(grid, 'R', 100);
     renderer.setInjectionAmount(50);
@@ -209,7 +209,7 @@ describe('GridRenderer', () => {
     const grid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
 
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     const firstCell = container.querySelector('.grid-cell');
 
     renderer.render(grid);
@@ -223,7 +223,7 @@ describe('GridRenderer', () => {
     const grid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
 
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     const cellElement = container.querySelector('[data-x="1"][data-y="1"]');
     const colorBefore = cellElement.style.backgroundColor;
 
@@ -239,15 +239,15 @@ describe('GridRenderer', () => {
     expect(cellElement.style.backgroundColor).toBe(tempEl.style.backgroundColor);
   });
 
-  test('should do a full rebuild when grid size changes between renders', () => {
+  test('should do a full rebuild when buildGrid is called with a different-sized grid', () => {
     const smallGrid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
 
-    renderer.render(smallGrid);
+    renderer.buildGrid(smallGrid);
     const oldCell = container.querySelector('.grid-cell');
 
     const largeGrid = new Grid(4, 4);
-    renderer.render(largeGrid);
+    renderer.buildGrid(largeGrid);
 
     // Old cell reference should no longer be in the DOM
     expect(container.contains(oldCell)).toBe(false);
