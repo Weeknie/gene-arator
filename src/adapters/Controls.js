@@ -81,8 +81,8 @@ export function createControls(renderer, grid) {
   
   const codeTextarea = document.createElement('textarea');
   codeTextarea.id = 'genetic-code-input';
-  codeTextarea.rows = 3;
-  codeTextarea.style.width = '200px';
+  codeTextarea.rows = 8;
+  codeTextarea.style.width = '300px';
   codeTextarea.placeholder = 'e.g. R+10;G+5';
   const savedCode = typeof localStorage !== 'undefined' ? localStorage.getItem('geneticCode') : null;
   if (savedCode) {

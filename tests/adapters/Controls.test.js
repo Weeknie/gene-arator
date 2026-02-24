@@ -98,4 +98,10 @@ describe('createControls', () => {
 
     expect(grid.getCell(0, 0).getProteinAmount('R')).toBe(0);
   });
+
+  test('should render genetic code textarea with at least 8 rows', () => {
+    createControls(renderer, grid);
+    const textarea = document.getElementById('genetic-code-input');
+    expect(parseInt(textarea.rows)).toBeGreaterThanOrEqual(8);
+  });
 });
