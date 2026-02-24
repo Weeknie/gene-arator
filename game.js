@@ -4,6 +4,7 @@ import { GeneticCode } from './src/domain/GeneticCode.js';
 import { SettingsMenu } from './src/adapters/SettingsMenu.js';
 import { createControls } from './src/adapters/Controls.js';
 import { Presets } from './src/adapters/Presets.js';
+import { Inspector } from './src/adapters/Inspector.js';
 import { presets } from './src/presets.js';
 import { FpsCounter } from './src/domain/FpsCounter.js';
 import { FpsDisplay } from './src/adapters/FpsDisplay.js';
@@ -29,6 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial render
   renderer.buildGrid(grid);
   renderer.enableProteinInjection(grid, 'R', 255);
+
+  // Initialize inspector panel
+  const inspectorPanel = document.getElementById('inspector-panel');
+  const inspector = new Inspector(inspectorPanel);
+  inspector.render();
+  inspector.enableInspection(grid, container);
   
   // Add UI controls
   createControls(renderer, grid);

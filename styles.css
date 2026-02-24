@@ -104,6 +104,44 @@ h1 {
 }
 
 
+/* Inspector Panel */
+#inspector-panel {
+    min-width: 140px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    text-align: left;
+}
+
+.inspector-heading {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #ccc;
+}
+
+.inspector-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.inspector-item {
+    padding: 4px 10px;
+    font-size: 0.875rem;
+    color: #333;
+    font-family: monospace;
+}
+
+.inspector-empty {
+    padding: 4px 10px;
+    font-size: 0.875rem;
+    color: #999;
+    font-style: italic;
+}
+
 .settings-wrapper {
     position: absolute;
     top: 20px;
