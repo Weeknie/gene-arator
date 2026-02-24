@@ -99,6 +99,12 @@ describe('createControls', () => {
     expect(grid.getCell(0, 0).getProteinAmount('R')).toBe(0);
   });
 
+  test('should render genetic code textarea with at least 8 rows', () => {
+    createControls(renderer, grid);
+    const textarea = document.getElementById('genetic-code-input');
+    expect(textarea.rows).toBeGreaterThanOrEqual(8);
+  });
+    
   test('should render a protein-input text field with default value "R"', () => {
     createControls(renderer, grid);
     const input = document.getElementById('protein-input');

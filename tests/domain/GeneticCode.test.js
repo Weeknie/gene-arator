@@ -188,4 +188,13 @@ describe('GeneticCode', () => {
     expect(geneticCode.genes.get('A')).toBe(5);
     expect(geneticCode.genes.get('R')).toBe(-2);
   });
+
+  test('should parse multi-line genetic code as if whitespace', () => {
+    const geneticCode = new GeneticCode('R+10;\nG+5;\nB+2');
+    
+    expect(geneticCode.genes.size).toBe(3);
+    expect(geneticCode.genes.get('R')).toBe(10);
+    expect(geneticCode.genes.get('G')).toBe(5);
+    expect(geneticCode.genes.get('B')).toBe(2);
+  });
 });
