@@ -96,6 +96,9 @@ export class GridRenderer {
         if (e.target.classList.contains('grid-cell')) {
           const x = parseInt(e.target.dataset.x);
           const y = parseInt(e.target.dataset.y);
+          // Queue the injection; it will be applied at the start of the next
+          // simulation tick via flushPendingInjections(), preventing clicks from
+          // being lost during DOM reconstruction in render().
           this.pendingInjections.push({ x, y, protein: this.selectedProtein, amount: this.injectionAmount });
         }
       });
