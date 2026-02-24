@@ -7,6 +7,7 @@ import { Presets } from './src/adapters/Presets.js';
 import { presets } from './src/presets.js';
 import { FpsCounter } from './src/domain/FpsCounter.js';
 import { FpsDisplay } from './src/adapters/FpsDisplay.js';
+import { LowFpsWatcher } from './src/domain/LowFpsWatcher.js';
 
 // Initialize the game when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const renderer = new GridRenderer(container);
 
   const fpsCounter = new FpsCounter();
+  const lowFpsWatcher = new LowFpsWatcher();
   const appContainer = document.querySelector('.container');
   const fpsDisplay = new FpsDisplay(appContainer);
   fpsDisplay.render();
@@ -66,11 +68,20 @@ document.addEventListener('DOMContentLoaded', () => {
   function startSimulation() {
     if (!isRunning) {
       isRunning = true;
+      lowFpsWatcher.reset();
+      fpsDisplay.hideWarning();
       intervalId = setInterval(() => {
         grid.tick();
         renderer.render(grid);
         fpsCounter.tick();
-        fpsDisplay.update(fpsCounter.getFps());
+        const fps = fpsCounter.getFps();
+        fpsDisplay.update(fps);
+        if (lowFpsWatcher.check(fps, Date.now())) {
+          isRunning = false;
+          clearInterval(intervalId);
+          document.getElementById('start-btn').textContent = 'Start';
+          fpsDisplay.showWarning();
+        }
       }, 100);
       document.getElementById('start-btn').textContent = 'Pause';
     } else {
