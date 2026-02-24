@@ -60,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!isRunning) {
       isRunning = true;
       intervalId = setInterval(() => {
-        renderer.flushPendingInjections();
         grid.tick();
         renderer.render(grid);
       }, 100);

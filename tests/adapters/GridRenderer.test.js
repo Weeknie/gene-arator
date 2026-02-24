@@ -158,9 +158,7 @@ describe('GridRenderer', () => {
     const cell = container.querySelector('[data-x="1"][data-y="1"]');
     cell.click();
     
-    // After click, injection is queued but NOT yet applied to cell
-    // Must flush to apply
-    renderer.flushPendingInjections();
+    // Injection is applied immediately on click
     expect(grid.getCell(1, 1).getProteinAmount('R')).toBe(100);
   });
 
@@ -174,7 +172,6 @@ describe('GridRenderer', () => {
     const cell = container.querySelector('[data-x="0"][data-y="0"]');
     cell.click();
     
-    renderer.flushPendingInjections();
     expect(grid.getCell(0, 0).getProteinAmount('G')).toBe(50);
   });
 
@@ -189,7 +186,6 @@ describe('GridRenderer', () => {
     const cell = container.querySelector('[data-x="1"][data-y="1"]');
     cell.click();
     
-    renderer.flushPendingInjections();
     // Cell should have B protein, not R
     expect(grid.getCell(1, 1).getProteinAmount('B')).toBe(100);
     expect(grid.getCell(1, 1).getProteinAmount('R')).toBe(0);
@@ -206,91 +202,55 @@ describe('GridRenderer', () => {
     const cell = container.querySelector('[data-x="1"][data-y="1"]');
     cell.click();
     
-    renderer.flushPendingInjections();
     expect(grid.getCell(1, 1).getProteinAmount('R')).toBe(50);
   });
 
-  test('should start with an empty pendingInjections array', () => {
-    const renderer = new GridRenderer(container);
-    expect(renderer.pendingInjections).toEqual([]);
-  });
-
-  test('should queue injection in pendingInjections on click without applying it to the cell', () => {
+  test('should reuse existing DOM cells on re-render instead of rebuilding them', () => {
     const grid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
+
     renderer.render(grid);
-    
-    renderer.enableProteinInjection(grid, 'R', 100);
-    
-    const cell = container.querySelector('[data-x="2"][data-y="1"]');
-    cell.click();
-    
-    // Injection is queued but NOT yet applied
-    expect(renderer.pendingInjections).toHaveLength(1);
-    expect(renderer.pendingInjections[0]).toEqual({ x: 2, y: 1, protein: 'R', amount: 100 });
-    expect(grid.getCell(2, 1).getProteinAmount('R')).toBe(0);
+    const firstCell = container.querySelector('.grid-cell');
+
+    renderer.render(grid);
+    const firstCellAfterRerender = container.querySelector('.grid-cell');
+
+    // Same DOM element reference — no rebuild occurred
+    expect(firstCellAfterRerender).toBe(firstCell);
   });
 
-  test('should apply all queued injections when flushPendingInjections is called', () => {
+  test('should update cell color in-place when render is called again', () => {
     const grid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
+
     renderer.render(grid);
-    
-    renderer.enableProteinInjection(grid, 'G', 75);
-    
-    const cell = container.querySelector('[data-x="0"][data-y="2"]');
-    cell.click();
-    
-    // Not yet applied
-    expect(grid.getCell(0, 2).getProteinAmount('G')).toBe(0);
-    
-    renderer.flushPendingInjections();
-    
-    // Now applied
-    expect(grid.getCell(0, 2).getProteinAmount('G')).toBe(75);
+    const cellElement = container.querySelector('[data-x="1"][data-y="1"]');
+    const colorBefore = cellElement.style.backgroundColor;
+
+    grid.getCell(1, 1).addProtein('R', 255);
+    renderer.render(grid);
+
+    // Color should have changed in the same element
+    expect(cellElement.style.backgroundColor).not.toBe(colorBefore);
+
+    // Normalize expected color through the same DOM path jsdom uses
+    const tempEl = document.createElement('div');
+    tempEl.style.backgroundColor = renderer.getCellColor(grid.getCell(1, 1));
+    expect(cellElement.style.backgroundColor).toBe(tempEl.style.backgroundColor);
   });
 
-  test('should clear pendingInjections after flushPendingInjections is called', () => {
-    const grid = new Grid(3, 3);
+  test('should do a full rebuild when grid size changes between renders', () => {
+    const smallGrid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
-    
-    renderer.enableProteinInjection(grid, 'R', 100);
-    
-    const cell = container.querySelector('[data-x="1"][data-y="0"]');
-    cell.click();
-    
-    renderer.flushPendingInjections();
-    
-    expect(renderer.pendingInjections).toEqual([]);
-  });
 
-  test('should queue multiple injections for multiple clicks', () => {
-    const grid = new Grid(3, 3);
-    const renderer = new GridRenderer(container);
-    renderer.render(grid);
-    
-    renderer.enableProteinInjection(grid, 'B', 60);
-    
-    container.querySelector('[data-x="0"][data-y="0"]').click();
-    container.querySelector('[data-x="1"][data-y="1"]').click();
-    container.querySelector('[data-x="2"][data-y="2"]').click();
-    
-    expect(renderer.pendingInjections).toHaveLength(3);
-    
-    renderer.flushPendingInjections();
-    
-    expect(grid.getCell(0, 0).getProteinAmount('B')).toBe(60);
-    expect(grid.getCell(1, 1).getProteinAmount('B')).toBe(60);
-    expect(grid.getCell(2, 2).getProteinAmount('B')).toBe(60);
-    expect(renderer.pendingInjections).toEqual([]);
-  });
+    renderer.render(smallGrid);
+    const oldCell = container.querySelector('.grid-cell');
 
-  test('should do nothing when flushPendingInjections is called before grid is set', () => {
-    const renderer = new GridRenderer(container);
-    // No enableProteinInjection called, so this.grid is null
-    expect(() => renderer.flushPendingInjections()).not.toThrow();
-    expect(renderer.pendingInjections).toEqual([]);
+    const largeGrid = new Grid(4, 4);
+    renderer.render(largeGrid);
+
+    // Old cell reference should no longer be in the DOM
+    expect(container.contains(oldCell)).toBe(false);
   });
 
   // HSL algorithm specific tests

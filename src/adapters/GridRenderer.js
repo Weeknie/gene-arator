@@ -4,7 +4,6 @@ export class GridRenderer {
     this.selectedProtein = 'R';
     this.injectionAmount = 100;
     this.grid = null;
-    this.pendingInjections = [];
   }
 
   /**
@@ -96,10 +95,9 @@ export class GridRenderer {
         if (e.target.classList.contains('grid-cell')) {
           const x = parseInt(e.target.dataset.x);
           const y = parseInt(e.target.dataset.y);
-          // Queue the injection; it will be applied at the start of the next
-          // simulation tick via flushPendingInjections(), preventing clicks from
-          // being lost during DOM reconstruction in render().
-          this.pendingInjections.push({ x, y, protein: this.selectedProtein, amount: this.injectionAmount });
+          const cell = this.grid.getCell(x, y);
+          cell.addProtein(this.selectedProtein, this.injectionAmount);
+          e.target.style.backgroundColor = this.getCellColor(cell);
         }
       });
       this.clickHandlerAttached = true;
@@ -114,46 +112,40 @@ export class GridRenderer {
     this.injectionAmount = amount;
   }
 
-  flushPendingInjections() {
-    if (!this.grid) return;
-    for (const injection of this.pendingInjections) {
-      this.grid.getCell(injection.x, injection.y).addProtein(injection.protein, injection.amount);
-    }
-    this.pendingInjections = [];
-  }
-
   render(grid) {
-    // Clear the container
+    const existingCells = this.container.querySelectorAll('.grid-cell');
+    const expectedCount = grid.width * grid.height;
+
+    if (existingCells.length === expectedCount) {
+      // In-place update: just change colours
+      let i = 0;
+      for (let y = 0; y < grid.height; y++) {
+        for (let x = 0; x < grid.width; x++) {
+          existingCells[i].style.backgroundColor = this.getCellColor(grid.getCell(x, y));
+          i++;
+        }
+      }
+      return;
+    }
+
+    // Full rebuild (first render or grid size changed)
     this.container.innerHTML = '';
-    
-    // Create the grid element
     const gridElement = document.createElement('div');
     gridElement.className = 'grid';
-    
-    // Create rows and cells
     for (let y = 0; y < grid.height; y++) {
       const rowElement = document.createElement('div');
       rowElement.className = 'grid-row';
-      
       for (let x = 0; x < grid.width; x++) {
         const cell = grid.getCell(x, y);
         const cellElement = document.createElement('div');
         cellElement.className = 'grid-cell';
         cellElement.dataset.x = cell.x;
         cellElement.dataset.y = cell.y;
-        
-        // Apply color based on proteins
-        const color = this.getCellColor(cell);
-        if (color) {
-          cellElement.style.backgroundColor = color;
-        }
-        
+        cellElement.style.backgroundColor = this.getCellColor(cell);
         rowElement.appendChild(cellElement);
       }
-      
       gridElement.appendChild(rowElement);
     }
-    
     this.container.appendChild(gridElement);
   }
 }
