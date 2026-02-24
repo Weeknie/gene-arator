@@ -40,7 +40,38 @@ describe('FpsDisplay', () => {
 
     display.render();
 
-    expect(container.children.length).toBe(1);
+    expect(container.children.length).toBe(2);
     expect(container.children[0].id).toBe('fps-counter');
+  });
+
+  test('render() creates a hidden fps-warning element', () => {
+    const display = new FpsDisplay(container);
+
+    display.render();
+
+    const el = container.querySelector('#fps-warning');
+    expect(el).toBeTruthy();
+    expect(el.style.display).toBe('none');
+  });
+
+  test('showWarning() makes the warning element visible', () => {
+    const display = new FpsDisplay(container);
+    display.render();
+
+    display.showWarning();
+
+    const el = container.querySelector('#fps-warning');
+    expect(el.style.display).toBe('block');
+  });
+
+  test('hideWarning() hides the warning element', () => {
+    const display = new FpsDisplay(container);
+    display.render();
+    display.showWarning();
+
+    display.hideWarning();
+
+    const el = container.querySelector('#fps-warning');
+    expect(el.style.display).toBe('none');
   });
 });
