@@ -4,6 +4,7 @@ export class GridRenderer {
     this.selectedProtein = 'R';
     this.injectionAmount = 100;
     this.grid = null;
+    this.pendingInjections = [];
   }
 
   /**
@@ -95,11 +96,7 @@ export class GridRenderer {
         if (e.target.classList.contains('grid-cell')) {
           const x = parseInt(e.target.dataset.x);
           const y = parseInt(e.target.dataset.y);
-          const cell = this.grid.getCell(x, y);
-          cell.addProtein(this.selectedProtein, this.injectionAmount);
-          
-          // Re-render to show color change
-          this.render(this.grid);
+          this.pendingInjections.push({ x, y, protein: this.selectedProtein, amount: this.injectionAmount });
         }
       });
       this.clickHandlerAttached = true;
@@ -112,6 +109,13 @@ export class GridRenderer {
 
   setInjectionAmount(amount) {
     this.injectionAmount = amount;
+  }
+
+  flushPendingInjections() {
+    for (const injection of this.pendingInjections) {
+      this.grid.getCell(injection.x, injection.y).addProtein(injection.protein, injection.amount);
+    }
+    this.pendingInjections = [];
   }
 
   render(grid) {
