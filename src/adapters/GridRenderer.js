@@ -97,9 +97,7 @@ export class GridRenderer {
           const y = parseInt(e.target.dataset.y);
           const cell = this.grid.getCell(x, y);
           cell.addProtein(this.selectedProtein, this.injectionAmount);
-          
-          // Re-render to show color change
-          this.render(this.grid);
+          e.target.style.backgroundColor = this.getCellColor(cell);
         }
       });
       this.clickHandlerAttached = true;
@@ -114,39 +112,37 @@ export class GridRenderer {
     this.injectionAmount = amount;
   }
 
-  render(grid) {
-    // Clear the container
+  buildGrid(grid) {
     this.container.innerHTML = '';
-    
-    // Create the grid element
     const gridElement = document.createElement('div');
     gridElement.className = 'grid';
-    
-    // Create rows and cells
+    this.cellElements = [];
     for (let y = 0; y < grid.height; y++) {
       const rowElement = document.createElement('div');
       rowElement.className = 'grid-row';
-      
       for (let x = 0; x < grid.width; x++) {
         const cell = grid.getCell(x, y);
         const cellElement = document.createElement('div');
         cellElement.className = 'grid-cell';
         cellElement.dataset.x = cell.x;
         cellElement.dataset.y = cell.y;
-        
-        // Apply color based on proteins
-        const color = this.getCellColor(cell);
-        if (color) {
-          cellElement.style.backgroundColor = color;
-        }
-        
+        cellElement.style.backgroundColor = this.getCellColor(cell);
         rowElement.appendChild(cellElement);
+        this.cellElements.push(cellElement);
       }
-      
       gridElement.appendChild(rowElement);
     }
-    
     this.container.appendChild(gridElement);
+  }
+
+  render(grid) {
+    let i = 0;
+    for (let y = 0; y < grid.height; y++) {
+      for (let x = 0; x < grid.width; x++) {
+        this.cellElements[i].style.backgroundColor = this.getCellColor(grid.getCell(x, y));
+        i++;
+      }
+    }
   }
 }
 

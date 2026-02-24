@@ -23,7 +23,7 @@ describe('GridRenderer', () => {
     const grid = new Grid(10, 10);
     const renderer = new GridRenderer(container);
     
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     const gridElement = container.querySelector('.grid');
     expect(gridElement).toBeTruthy();
@@ -33,7 +33,7 @@ describe('GridRenderer', () => {
     const grid = new Grid(10, 10);
     const renderer = new GridRenderer(container);
     
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     const rows = container.querySelectorAll('.grid-row');
     expect(rows.length).toBe(10);
@@ -43,7 +43,7 @@ describe('GridRenderer', () => {
     const grid = new Grid(10, 10);
     const renderer = new GridRenderer(container);
     
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     const firstRow = container.querySelector('.grid-row');
     const cells = firstRow.querySelectorAll('.grid-cell');
@@ -54,7 +54,7 @@ describe('GridRenderer', () => {
     const grid = new Grid(10, 10);
     const renderer = new GridRenderer(container);
     
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     const cellElement = container.querySelector('.grid-cell');
     expect(cellElement.dataset.x).toBe('0');
@@ -65,7 +65,7 @@ describe('GridRenderer', () => {
     const grid = new Grid(10, 10);
     const renderer = new GridRenderer(container);
     
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     const allCells = container.querySelectorAll('.grid-cell');
     expect(allCells.length).toBe(100);
@@ -151,21 +151,21 @@ describe('GridRenderer', () => {
   test('should attach click handlers to cells when enableProteinInjection is called', () => {
     const grid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     renderer.enableProteinInjection(grid, 'R', 100);
     
     const cell = container.querySelector('[data-x="1"][data-y="1"]');
     cell.click();
     
-    // Cell should now have the protein
+    // Injection is applied immediately on click
     expect(grid.getCell(1, 1).getProteinAmount('R')).toBe(100);
   });
 
   test('should add protein when cell is clicked', () => {
     const grid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     renderer.enableProteinInjection(grid, 'G', 50);
     
@@ -178,7 +178,7 @@ describe('GridRenderer', () => {
   test('should update selected protein type', () => {
     const grid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     renderer.enableProteinInjection(grid, 'R', 100);
     renderer.setSelectedProtein('B');
@@ -194,7 +194,7 @@ describe('GridRenderer', () => {
   test('should update injection amount', () => {
     const grid = new Grid(3, 3);
     const renderer = new GridRenderer(container);
-    renderer.render(grid);
+    renderer.buildGrid(grid);
     
     renderer.enableProteinInjection(grid, 'R', 100);
     renderer.setInjectionAmount(50);
@@ -203,6 +203,54 @@ describe('GridRenderer', () => {
     cell.click();
     
     expect(grid.getCell(1, 1).getProteinAmount('R')).toBe(50);
+  });
+
+  test('should reuse existing DOM cells on re-render instead of rebuilding them', () => {
+    const grid = new Grid(3, 3);
+    const renderer = new GridRenderer(container);
+
+    renderer.buildGrid(grid);
+    const firstCell = container.querySelector('.grid-cell');
+
+    renderer.render(grid);
+    const firstCellAfterRerender = container.querySelector('.grid-cell');
+
+    // Same DOM element reference — no rebuild occurred
+    expect(firstCellAfterRerender).toBe(firstCell);
+  });
+
+  test('should update cell color in-place when render is called again', () => {
+    const grid = new Grid(3, 3);
+    const renderer = new GridRenderer(container);
+
+    renderer.buildGrid(grid);
+    const cellElement = container.querySelector('[data-x="1"][data-y="1"]');
+    const colorBefore = cellElement.style.backgroundColor;
+
+    grid.getCell(1, 1).addProtein('R', 255);
+    renderer.render(grid);
+
+    // Color should have changed in the same element
+    expect(cellElement.style.backgroundColor).not.toBe(colorBefore);
+
+    // Normalize expected color through the same DOM path jsdom uses
+    const tempEl = document.createElement('div');
+    tempEl.style.backgroundColor = renderer.getCellColor(grid.getCell(1, 1));
+    expect(cellElement.style.backgroundColor).toBe(tempEl.style.backgroundColor);
+  });
+
+  test('should do a full rebuild when buildGrid is called with a different-sized grid', () => {
+    const smallGrid = new Grid(3, 3);
+    const renderer = new GridRenderer(container);
+
+    renderer.buildGrid(smallGrid);
+    const oldCell = container.querySelector('.grid-cell');
+
+    const largeGrid = new Grid(4, 4);
+    renderer.buildGrid(largeGrid);
+
+    // Old cell reference should no longer be in the DOM
+    expect(container.contains(oldCell)).toBe(false);
   });
 
   // HSL algorithm specific tests
