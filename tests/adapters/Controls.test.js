@@ -102,6 +102,6 @@ describe('createControls', () => {
   test('should render genetic code textarea with at least 8 rows', () => {
     createControls(renderer, grid);
     const textarea = document.getElementById('genetic-code-input');
-    expect(parseInt(textarea.rows)).toBeGreaterThanOrEqual(8);
+    expect(textarea.rows).toBeGreaterThanOrEqual(8);
   });
 });
