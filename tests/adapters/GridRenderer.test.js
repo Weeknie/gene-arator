@@ -286,6 +286,13 @@ describe('GridRenderer', () => {
     expect(renderer.pendingInjections).toEqual([]);
   });
 
+  test('should do nothing when flushPendingInjections is called before grid is set', () => {
+    const renderer = new GridRenderer(container);
+    // No enableProteinInjection called, so this.grid is null
+    expect(() => renderer.flushPendingInjections()).not.toThrow();
+    expect(renderer.pendingInjections).toEqual([]);
+  });
+
   // HSL algorithm specific tests
   test('should use pure HSL lightness when scaling factor is 1 (max protein = 255)', () => {
     const grid = new Grid(3, 3);

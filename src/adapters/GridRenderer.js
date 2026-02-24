@@ -112,6 +112,7 @@ export class GridRenderer {
   }
 
   flushPendingInjections() {
+    if (!this.grid) return;
     for (const injection of this.pendingInjections) {
       this.grid.getCell(injection.x, injection.y).addProtein(injection.protein, injection.amount);
     }
