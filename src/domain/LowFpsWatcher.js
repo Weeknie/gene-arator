@@ -5,7 +5,11 @@ export class LowFpsWatcher {
     this.lowFpsSince = null;
   }
 
-  check(fps, now = Date.now()) {
+  check(fps, now = Date.now(), isVisible = true) {
+    if (!isVisible) {
+      this.lowFpsSince = null;
+      return false;
+    }
     if (fps < this.thresholdFps) {
       if (this.lowFpsSince === null) {
         this.lowFpsSince = now;

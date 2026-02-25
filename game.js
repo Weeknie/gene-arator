@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fpsCounter.tick();
         const fps = fpsCounter.getFps();
         fpsDisplay.update(fps);
-        if (lowFpsWatcher.check(fps, Date.now())) {
+        if (lowFpsWatcher.check(fps, Date.now(), !document.hidden)) {
           isRunning = false;
           clearInterval(intervalId);
           document.getElementById('start-btn').textContent = 'Start';

@@ -49,4 +49,24 @@ describe('LowFpsWatcher', () => {
     watcher.check(4, 0);
     expect(watcher.check(4, 5000)).toBe(true);
   });
+
+  test('returns false when isVisible is false, even if fps is below threshold', () => {
+    const watcher = new LowFpsWatcher(5, 5000);
+    expect(watcher.check(3, 1000, false)).toBe(false);
+  });
+
+  test('resets the low-fps timer when isVisible is false', () => {
+    const watcher = new LowFpsWatcher(5, 5000);
+    watcher.check(3, 1000, true);   // start timer while visible
+    watcher.check(3, 3000, false);  // page hidden — should reset timer
+    expect(watcher.check(3, 5500, true)).toBe(false); // only ~2.5s since reset, not 5s yet
+  });
+
+  test('resets timer when visibility switches from true to false mid-sequence', () => {
+    const watcher = new LowFpsWatcher(5, 5000);
+    watcher.check(3, 1000, true);   // timer starts at t=1000
+    watcher.check(3, 4000, false);  // hidden — timer resets
+    watcher.check(3, 4500, true);   // visible again — timer starts fresh at t=4500
+    expect(watcher.check(3, 8000, true)).toBe(false); // only 3.5s since restart, not 5s yet
+  });
 });
