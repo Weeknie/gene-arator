@@ -2,6 +2,7 @@ export class Inspector {
   constructor(container) {
     this.container = container;
     this.grid = null;
+    this.currentCell = null;
   }
 
   render() {
@@ -25,13 +26,21 @@ export class Inspector {
         const x = parseInt(e.target.dataset.x);
         const y = parseInt(e.target.dataset.y);
         const cell = this.grid.getCell(x, y);
+        this.currentCell = cell;
         this._updateDisplay(cell);
       }
     });
 
     gridContainer.addEventListener('mouseleave', () => {
+      this.currentCell = null;
       this._clearDisplay();
     });
+  }
+
+  tick() {
+    if (this.currentCell !== null) {
+      this._updateDisplay(this.currentCell);
+    }
   }
 
   _updateDisplay(cell) {

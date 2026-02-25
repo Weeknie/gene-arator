@@ -159,6 +159,39 @@ describe('Inspector', () => {
     expect(container.querySelectorAll('.inspector-item')[0].textContent).toBe('G: 80');
   });
 
+  test('should update display when tick() is called while a cell is being hovered', () => {
+    const grid = new Grid(3, 3);
+    grid.getCell(1, 1).addProtein('R', 100);
+
+    const inspector = new Inspector(container);
+    inspector.render();
+
+    const cellEl = document.createElement('div');
+    cellEl.className = 'grid-cell';
+    cellEl.dataset.x = '1';
+    cellEl.dataset.y = '1';
+    gridContainer.appendChild(cellEl);
+
+    inspector.enableInspection(grid, gridContainer);
+
+    // Simulate hovering over the cell
+    cellEl.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+
+    // Verify initial display
+    expect(container.querySelectorAll('.inspector-item')[0].textContent).toBe('R: 100');
+
+    // Change the protein amount (simulating a simulation tick)
+    grid.getCell(1, 1).addProtein('R', 50);
+
+    // Call inspector tick to refresh the display
+    inspector.tick();
+
+    // Verify the updated amount is shown
+    const items = container.querySelectorAll('.inspector-item');
+    expect(items.length).toBe(1);
+    expect(items[0].textContent).toBe('R: 150');
+  });
+
   test('should ignore mouseover on non-cell elements', () => {
     const grid = new Grid(3, 3);
 
