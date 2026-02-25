@@ -28,6 +28,7 @@ export function createControls(renderer, grid) {
   buttonsRow.style.display = 'flex';
   buttonsRow.style.alignItems = 'center';
   buttonsRow.style.gap = '8px';
+  buttonsRow.style.justifyContent = 'center';
 
   // Apply Code button (left side)
   const applyCodeBtn = document.createElement('button');
@@ -71,6 +72,7 @@ export function createControls(renderer, grid) {
   proteinDiv.style.display = 'flex';
   proteinDiv.style.gap = '10px';
   proteinDiv.style.alignItems = 'center';
+  proteinDiv.style.justifyContent = 'center';
   
   const proteinLabel = document.createElement('label');
   proteinLabel.textContent = 'Protein to inject: ';

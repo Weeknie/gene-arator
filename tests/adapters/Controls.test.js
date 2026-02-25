@@ -147,4 +147,21 @@ describe('createControls', () => {
 
     expect(renderer.setSelectedProtein).toHaveBeenCalledWith('newProtein');
   });
+
+  test('buttonsRow (first child of #controls) should be centered with justifyContent center', () => {
+    createControls(renderer, grid);
+    const buttonsRow = document.querySelector('#controls > div:first-child');
+    expect(buttonsRow).toBeTruthy();
+    expect(buttonsRow.style.justifyContent).toBe('center');
+  });
+
+  test('proteinDiv (containing "Protein to inject" label) should be centered with justifyContent center', () => {
+    createControls(renderer, grid);
+    const allLabels = document.querySelectorAll('#controls > div label');
+    const proteinLabel = Array.from(allLabels).find(l => l.textContent.includes('Protein to inject'));
+    expect(proteinLabel).toBeTruthy();
+    const proteinDiv = proteinLabel.closest('#controls > div');
+    expect(proteinDiv).toBeTruthy();
+    expect(proteinDiv.style.justifyContent).toBe('center');
+  });
 });
