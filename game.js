@@ -80,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
       intervalId = setInterval(() => {
         grid.tick();
         renderer.render(grid);
+        inspector.tick();
         fpsCounter.tick();
         const fps = fpsCounter.getFps();
         fpsDisplay.update(fps);
