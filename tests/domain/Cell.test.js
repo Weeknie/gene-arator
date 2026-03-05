@@ -121,4 +121,35 @@ describe('Cell', () => {
     expect(cell.getProteinAmount('B')).toBe(0);
     expect(cell.proteins.size).toBe(0);
   });
+
+  test('should use per-protein decay rate when provided', () => {
+    const cell = new Cell(0, 0);
+    cell.addProtein('R', 100);
+    cell.addProtein('G', 100);
+
+    const proteinDecayRates = new Map([['R', 0.5]]);
+    cell.decay(0.1, proteinDecayRates); // R uses 50%, G uses global 10%
+
+    expect(cell.getProteinAmount('R')).toBe(50);
+    expect(cell.getProteinAmount('G')).toBe(90);
+  });
+
+  test('should fall back to global decay rate for proteins not in per-protein map', () => {
+    const cell = new Cell(0, 0);
+    cell.addProtein('A', 200);
+
+    cell.decay(0.2, new Map()); // empty per-protein map, uses global 20%
+
+    expect(cell.getProteinAmount('A')).toBe(160);
+  });
+
+  test('should use per-protein decay rate of 0 to prevent decay', () => {
+    const cell = new Cell(0, 0);
+    cell.addProtein('R', 100);
+
+    const proteinDecayRates = new Map([['R', 0]]);
+    cell.decay(0.5, proteinDecayRates); // R uses 0%, so no decay
+
+    expect(cell.getProteinAmount('R')).toBe(100);
+  });
 });

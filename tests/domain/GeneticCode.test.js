@@ -205,4 +205,57 @@ describe('GeneticCode', () => {
     expect(geneticCode.genes.get('A')).toBe(2);
     expect(geneticCode.genes.get('B')).toBe(0.5);
   });
+
+  // Per-protein property tests
+  test('should parse diff property gene', () => {
+    const geneticCode = new GeneticCode('X=diff(0.5)');
+
+    expect(geneticCode.proteinDiffusionRates.size).toBe(1);
+    expect(geneticCode.proteinDiffusionRates.get('X')).toBe(0.5);
+  });
+
+  test('should parse decay property gene', () => {
+    const geneticCode = new GeneticCode('Y=decay(0.01)');
+
+    expect(geneticCode.proteinDecayRates.size).toBe(1);
+    expect(geneticCode.proteinDecayRates.get('Y')).toBe(0.01);
+  });
+
+  test('should parse both diff and decay for same protein', () => {
+    const geneticCode = new GeneticCode('X=diff(0.5);X=decay(0.01)');
+
+    expect(geneticCode.proteinDiffusionRates.get('X')).toBe(0.5);
+    expect(geneticCode.proteinDecayRates.get('X')).toBe(0.01);
+  });
+
+  test('should parse property genes combined with production genes', () => {
+    const geneticCode = new GeneticCode('A+5;X=diff(0.3);B+2;Y=decay(0.05)');
+
+    expect(geneticCode.genes.size).toBe(2);
+    expect(geneticCode.genes.get('A')).toBe(5);
+    expect(geneticCode.genes.get('B')).toBe(2);
+    expect(geneticCode.proteinDiffusionRates.get('X')).toBe(0.3);
+    expect(geneticCode.proteinDecayRates.get('Y')).toBe(0.05);
+  });
+
+  test('should parse integer value in diff property gene', () => {
+    const geneticCode = new GeneticCode('R=diff(1)');
+
+    expect(geneticCode.proteinDiffusionRates.get('R')).toBe(1);
+  });
+
+  test('should throw error for invalid property expression', () => {
+    expect(() => {
+      new GeneticCode('X=invalid(0.5)');
+    }).toThrow(/Invalid genetic code/);
+  });
+
+  test('should initialize proteinDiffusionRates and proteinDecayRates as empty maps', () => {
+    const geneticCode = new GeneticCode('A+1');
+
+    expect(geneticCode.proteinDiffusionRates).toBeDefined();
+    expect(geneticCode.proteinDecayRates).toBeDefined();
+    expect(geneticCode.proteinDiffusionRates.size).toBe(0);
+    expect(geneticCode.proteinDecayRates.size).toBe(0);
+  });
 });
