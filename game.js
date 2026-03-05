@@ -5,6 +5,7 @@ import { SettingsMenu } from './src/adapters/SettingsMenu.js';
 import { createControls } from './src/adapters/Controls.js';
 import { Presets } from './src/adapters/Presets.js';
 import { Inspector } from './src/adapters/Inspector.js';
+import { Legend } from './src/adapters/Legend.js';
 import { presets } from './src/presets.js';
 import { FpsCounter } from './src/domain/FpsCounter.js';
 import { FpsDisplay } from './src/adapters/FpsDisplay.js';
@@ -57,6 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   presetsComponent.render();
+
+  // Initialize legend panel
+  const legendPanel = document.getElementById('legend-panel');
+  const legendComponent = new Legend(legendPanel);
+  legendComponent.render();
   
   // Apply saved genetic code if present
   const savedCode = typeof localStorage !== 'undefined' ? localStorage.getItem('geneticCode') : null;
