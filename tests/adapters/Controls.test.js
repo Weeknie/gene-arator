@@ -164,4 +164,34 @@ describe('createControls', () => {
     expect(proteinDiv).toBeTruthy();
     expect(proteinDiv.style.justifyContent).toBe('center');
   });
+
+  test('should render a speed-select dropdown with id speed-select', () => {
+    createControls(renderer, grid);
+    const select = document.getElementById('speed-select');
+    expect(select).toBeTruthy();
+    expect(select.tagName.toLowerCase()).toBe('select');
+  });
+
+  test('speed-select should have options for Normal, 5 FPS, and 1 FPS', () => {
+    createControls(renderer, grid);
+    const select = document.getElementById('speed-select');
+    const values = Array.from(select.options).map(o => o.value);
+    const texts = Array.from(select.options).map(o => o.textContent);
+    expect(values).toEqual(['0', '5', '1']);
+    expect(texts).toEqual(['Normal', '5 FPS', '1 FPS']);
+  });
+
+  test('speed-select should default to Normal (value "0")', () => {
+    createControls(renderer, grid);
+    const select = document.getElementById('speed-select');
+    expect(select.value).toBe('0');
+  });
+
+  test('speed-select should have a label "Simulation Speed"', () => {
+    createControls(renderer, grid);
+    const allLabels = document.querySelectorAll('label');
+    const speedLabel = Array.from(allLabels).find(l => l.textContent.includes('Simulation Speed'));
+    expect(speedLabel).toBeTruthy();
+    expect(speedLabel.htmlFor).toBe('speed-select');
+  });
 });

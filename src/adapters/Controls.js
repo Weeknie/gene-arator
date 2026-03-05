@@ -66,7 +66,40 @@ export function createControls(renderer, grid) {
   buttonsRow.appendChild(clearBtn);
 
   controlsDiv.appendChild(buttonsRow);
-  
+
+  // Speed control row
+  const speedDiv = document.createElement('div');
+  speedDiv.style.display = 'flex';
+  speedDiv.style.gap = '10px';
+  speedDiv.style.alignItems = 'center';
+  speedDiv.style.justifyContent = 'center';
+
+  const speedLabel = document.createElement('label');
+  speedLabel.textContent = 'Simulation Speed: ';
+  speedLabel.htmlFor = 'speed-select';
+  speedLabel.style.fontWeight = 'bold';
+  speedDiv.appendChild(speedLabel);
+
+  const speedSelect = document.createElement('select');
+  speedSelect.id = 'speed-select';
+  speedSelect.style.padding = '6px 8px';
+  speedSelect.style.fontSize = '14px';
+  speedSelect.style.borderRadius = '4px';
+  speedSelect.style.border = '1px solid #333';
+  [
+    { label: 'Normal', value: '0' },
+    { label: '5 FPS', value: '5' },
+    { label: '1 FPS', value: '1' },
+  ].forEach(({ label, value }) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    speedSelect.appendChild(option);
+  });
+  speedDiv.appendChild(speedSelect);
+
+  controlsDiv.appendChild(speedDiv);
+
   // Protein selector
   const proteinDiv = document.createElement('div');
   proteinDiv.style.display = 'flex';

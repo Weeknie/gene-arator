@@ -71,7 +71,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // Start simulation loop
   let isRunning = false;
   let intervalId = null;
-  
+
+  function getSimulationInterval() {
+    const speedSelect = document.getElementById('speed-select');
+    const targetFps = speedSelect ? Number(speedSelect.value) : 0;
+    if (targetFps === 1) return 1000;
+    if (targetFps === 5) return 200;
+    return 100;
+  }
+
+  function isIntentionalSlowMode() {
+    const speedSelect = document.getElementById('speed-select');
+    return speedSelect ? Number(speedSelect.value) > 0 : false;
+  }
+
   function startSimulation() {
     if (!isRunning) {
       isRunning = true;
@@ -84,13 +97,13 @@ document.addEventListener('DOMContentLoaded', () => {
         fpsCounter.tick();
         const fps = fpsCounter.getFps();
         fpsDisplay.update(fps);
-        if (lowFpsWatcher.check(fps, Date.now(), !document.hidden)) {
+        if (!isIntentionalSlowMode() && lowFpsWatcher.check(fps, Date.now(), !document.hidden)) {
           isRunning = false;
           clearInterval(intervalId);
           document.getElementById('start-btn').textContent = 'Start';
           fpsDisplay.showWarning();
         }
-      }, 100);
+      }, getSimulationInterval());
       document.getElementById('start-btn').textContent = 'Pause';
     } else {
       isRunning = false;
@@ -100,6 +113,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   document.getElementById('start-btn').addEventListener('click', startSimulation);
+
+  const speedSelectEl = document.getElementById('speed-select');
+  if (speedSelectEl) {
+    speedSelectEl.addEventListener('change', () => {
+      if (isRunning) {
+        clearInterval(intervalId);
+        intervalId = null;
+        isRunning = false;
+        startSimulation();
+      }
+    });
+  }
   
   // Auto-start the simulation
   startSimulation();
