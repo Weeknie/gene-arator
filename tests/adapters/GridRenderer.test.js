@@ -253,6 +253,32 @@ describe('GridRenderer', () => {
     expect(container.contains(oldCell)).toBe(false);
   });
 
+  test('should set --cell-size CSS variable on grid element based on grid dimensions', () => {
+    const grid = new Grid(20, 20);
+    const renderer = new GridRenderer(container);
+
+    renderer.buildGrid(grid);
+
+    const gridElement = container.querySelector('.grid');
+    expect(gridElement.style.getPropertyValue('--cell-size')).toBe('25px');
+  });
+
+  test('should reduce cell size when grid has more cells', () => {
+    const smallGrid = new Grid(10, 10);
+    const largeGrid = new Grid(50, 50);
+    const renderer = new GridRenderer(container);
+
+    renderer.buildGrid(smallGrid);
+    const gridElementSmall = container.querySelector('.grid');
+    const smallCellSize = parseFloat(gridElementSmall.style.getPropertyValue('--cell-size'));
+
+    renderer.buildGrid(largeGrid);
+    const gridElementLarge = container.querySelector('.grid');
+    const largeCellSize = parseFloat(gridElementLarge.style.getPropertyValue('--cell-size'));
+
+    expect(largeCellSize).toBeLessThan(smallCellSize);
+  });
+
   // HSL algorithm specific tests
   test('should use pure HSL lightness when scaling factor is 1 (max protein = 255)', () => {
     const grid = new Grid(3, 3);

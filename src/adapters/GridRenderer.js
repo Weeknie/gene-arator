@@ -116,6 +116,11 @@ export class GridRenderer {
     this.container.innerHTML = '';
     const gridElement = document.createElement('div');
     gridElement.className = 'grid';
+
+    const GRID_PIXEL_SIZE = 500;
+    const cellSize = GRID_PIXEL_SIZE / Math.max(grid.width, grid.height);
+    gridElement.style.setProperty('--cell-size', `${cellSize}px`);
+
     this.cellElements = [];
     for (let y = 0; y < grid.height; y++) {
       const rowElement = document.createElement('div');
