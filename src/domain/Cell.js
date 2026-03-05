@@ -18,9 +18,10 @@ export class Cell {
     this.proteins.clear();
   }
 
-  decay(decayRate) {
+  decay(decayRate, proteinDecayRates = new Map()) {
     for (const [proteinName, amount] of this.proteins.entries()) {
-      const newAmount = Math.max(0, amount * (1 - decayRate));
+      const rate = proteinDecayRates.has(proteinName) ? proteinDecayRates.get(proteinName) : decayRate;
+      const newAmount = Math.max(0, amount * (1 - rate));
       this.proteins.set(proteinName, newAmount);
     }
   }

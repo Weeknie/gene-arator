@@ -2,6 +2,8 @@ export class GeneticCode {
   constructor(code) {
     this.genes = new Map();
     this.conditionalGenes = [];
+    this.proteinDiffusionRates = new Map();
+    this.proteinDecayRates = new Map();
     this._parse(code);
   }
 
@@ -29,6 +31,8 @@ export class GeneticCode {
       // Check if this is a conditional token (contains "->")
       if (trimmedToken.includes('->')) {
         this._parseConditionalToken(trimmedToken, tokenIndex);
+      } else if (trimmedToken.includes('=')) {
+        this._parsePropertyToken(trimmedToken, tokenIndex);
       } else {
         // Parse unconditional token in format "ProteinName+ProductionRate" or "ProteinName-ProductionRate"
         let parts = trimmedToken.split('+');
@@ -60,6 +64,29 @@ export class GeneticCode {
 
         this.genes.set(proteinName, productionRate);
       }
+    }
+  }
+
+  _parsePropertyToken(token, tokenIndex) {
+    const propertyPattern = /^([^=]+)=(diff|decay)\((\d+(?:\.\d+)?)\)$/;
+    const match = token.match(propertyPattern);
+
+    if (!match) {
+      throw new Error(`Invalid genetic code at token ${tokenIndex} ("${token}"): invalid property expression`);
+    }
+
+    const proteinName = match[1].trim();
+    const propertyType = match[2];
+    const value = parseFloat(match[3]);
+
+    if (proteinName === '') {
+      throw new Error(`Invalid genetic code at token ${tokenIndex} ("${token}"): empty protein name`);
+    }
+
+    if (propertyType === 'diff') {
+      this.proteinDiffusionRates.set(proteinName, value);
+    } else if (propertyType === 'decay') {
+      this.proteinDecayRates.set(proteinName, value);
     }
   }
 

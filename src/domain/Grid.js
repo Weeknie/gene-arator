@@ -96,7 +96,10 @@ export class Grid {
         // For each protein in this cell
         for (const [proteinName, amount] of cell.proteins.entries()) {
           if (amount > 0) {
-            const amountToDiffuse = amount * this.diffusionRate;
+            const diffusionRate = (this.geneticCode && this.geneticCode.proteinDiffusionRates.has(proteinName))
+              ? this.geneticCode.proteinDiffusionRates.get(proteinName)
+              : this.diffusionRate;
+            const amountToDiffuse = amount * diffusionRate;
             // Always divide by 4 (fully surrounded); out-of-bounds protein is discarded
             const amountPerNeighbor = amountToDiffuse / 4;
             
@@ -132,9 +135,10 @@ export class Grid {
     }
     
     // Apply decay to all cells
+    const proteinDecayRates = this.geneticCode ? this.geneticCode.proteinDecayRates : new Map();
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
-        this.cells[y][x].decay(this.decayRate);
+        this.cells[y][x].decay(this.decayRate, proteinDecayRates);
       }
     }
   }

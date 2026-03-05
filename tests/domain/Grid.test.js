@@ -291,4 +291,48 @@ describe('Grid', () => {
     expect(grid.getCell(0, 0).getProteinAmount('A')).toBe(25);
     expect(grid.getCell(0, 0).getProteinAmount('R')).toBe(10);
   });
+
+  // Per-protein property tests
+  test('should use per-protein diffusion rate from genetic code', () => {
+    const grid = new Grid(3, 3, 0.0, 0.2); // No decay, global 20% diffusion
+    const geneticCode = new GeneticCode('R=diff(0.0)'); // R has 0% diffusion
+    grid.setGeneticCode(geneticCode);
+
+    grid.getCell(1, 1).addProtein('R', 100);
+
+    grid.tick();
+
+    // R should not diffuse because per-protein rate is 0
+    expect(grid.getCell(1, 1).getProteinAmount('R')).toBeCloseTo(100);
+    expect(grid.getCell(0, 1).getProteinAmount('R')).toBeCloseTo(0);
+  });
+
+  test('should use per-protein decay rate from genetic code', () => {
+    const grid = new Grid(3, 3, 0.1, 0.0); // 10% global decay, no diffusion
+    const geneticCode = new GeneticCode('R=decay(0.5)'); // R has 50% decay
+    grid.setGeneticCode(geneticCode);
+
+    grid.getCell(0, 0).addProtein('R', 100);
+    grid.getCell(0, 0).addProtein('G', 100);
+
+    grid.tick();
+
+    // R should use 50% decay, G should use global 10% decay
+    expect(grid.getCell(0, 0).getProteinAmount('R')).toBeCloseTo(50);
+    expect(grid.getCell(0, 0).getProteinAmount('G')).toBeCloseTo(90);
+  });
+
+  test('should apply per-protein diff and decay independently for different proteins', () => {
+    const grid = new Grid(1, 1, 0.0, 0.0); // No global decay or diffusion
+    const geneticCode = new GeneticCode('A=decay(0.2);B=decay(0.5)');
+    grid.setGeneticCode(geneticCode);
+
+    grid.getCell(0, 0).addProtein('A', 100);
+    grid.getCell(0, 0).addProtein('B', 100);
+
+    grid.tick();
+
+    expect(grid.getCell(0, 0).getProteinAmount('A')).toBeCloseTo(80);
+    expect(grid.getCell(0, 0).getProteinAmount('B')).toBeCloseTo(50);
+  });
 });
