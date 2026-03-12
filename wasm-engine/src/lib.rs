@@ -101,6 +101,21 @@ impl WasmGrid {
         self.cells[y * self.width + x].b
     }
 
+    /// Return all protein data as a flat array: [r0, g0, b0, r1, g1, b1, …].
+    ///
+    /// The order is row-major (y = 0..height, x = 0..width within each row).
+    /// Reading the entire grid in one call avoids repeated JS↔WASM boundary
+    /// crossings and is the preferred way for JavaScript to access grid data.
+    pub fn get_proteins_flat(&self) -> Vec<f64> {
+        let mut buf = Vec::with_capacity(self.cells.len() * 3);
+        for cell in &self.cells {
+            buf.push(cell.r);
+            buf.push(cell.g);
+            buf.push(cell.b);
+        }
+        buf
+    }
+
     /// Apply a single simulation tick: diffusion then decay.
     ///
     /// - `diffusion_rate`: fraction of each protein that spreads to neighbours
@@ -246,5 +261,76 @@ mod tests {
         assert!((grid.get_r(0, 0) - 90.0).abs() < 1e-9);
         assert!((grid.get_g(0, 0) - 180.0).abs() < 1e-9);
         assert!((grid.get_b(0, 0) - 45.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn get_proteins_flat_has_correct_length() {
+        let grid = WasmGrid::new(5, 7);
+        assert_eq!(grid.get_proteins_flat().len(), 5 * 7 * 3);
+    }
+
+    #[test]
+    fn get_proteins_flat_returns_values_in_row_major_order() {
+        let mut grid = WasmGrid::new(2, 2);
+        // Set each cell to a unique recognizable triple.
+        grid.cells[0] = Cell { r: 1.0, g: 2.0, b: 3.0 }; // (x=0, y=0)
+        grid.cells[1] = Cell { r: 4.0, g: 5.0, b: 6.0 }; // (x=1, y=0)
+        grid.cells[2] = Cell { r: 7.0, g: 8.0, b: 9.0 }; // (x=0, y=1)
+        grid.cells[3] = Cell { r: 10.0, g: 11.0, b: 12.0 }; // (x=1, y=1)
+
+        let flat = grid.get_proteins_flat();
+        assert_eq!(flat.len(), 12);
+        assert_eq!(&flat[0..3], &[1.0, 2.0, 3.0]);
+        assert_eq!(&flat[3..6], &[4.0, 5.0, 6.0]);
+        assert_eq!(&flat[6..9], &[7.0, 8.0, 9.0]);
+        assert_eq!(&flat[9..12], &[10.0, 11.0, 12.0]);
+    }
+
+    #[test]
+    fn get_proteins_flat_matches_per_cell_accessors() {
+        let mut grid = WasmGrid::new(3, 3);
+        grid.randomize(42);
+        let flat = grid.get_proteins_flat();
+        for y in 0..3 {
+            for x in 0..3 {
+                let idx = (y * 3 + x) * 3;
+                assert_eq!(flat[idx],     grid.get_r(x, y));
+                assert_eq!(flat[idx + 1], grid.get_g(x, y));
+                assert_eq!(flat[idx + 2], grid.get_b(x, y));
+            }
+        }
+    }
+
+    #[test]
+    fn get_proteins_flat_reflects_state_after_tick() {
+        let mut grid = WasmGrid::new(1, 1);
+        grid.cells[0] = Cell { r: 100.0, g: 0.0, b: 0.0 };
+
+        let before = grid.get_proteins_flat();
+        assert_eq!(before[0], 100.0);
+
+        // 10 % decay, no diffusion
+        grid.tick(0.0, 0.1);
+        let after = grid.get_proteins_flat();
+        assert!((after[0] - 90.0).abs() < 1e-9, "R should decay to 90, got {}", after[0]);
+    }
+
+    #[test]
+    fn tick_diffuses_protein_to_neighbour() {
+        // 2×1 grid: cell(0,0) has R=100, cell(1,0) has R=0.
+        // Each cell always divides its outgoing protein among all 4 cardinal
+        // directions; protein headed out-of-bounds is discarded.  In this 2×1
+        // grid, each cell has exactly one in-bounds neighbour, so 3 out of 4
+        // shares are lost to the boundary.  diffusionRate=0.2, decayRate=0.
+        //   cell(0,0): r_stay = 100*(1-0.2) = 80,
+        //              r_in from (1,0)       = 0*0.2/4 = 0  → result = 80
+        //   cell(1,0): r_stay = 0,
+        //              r_in from (0,0)       = 100*0.2/4 = 5 → result = 5
+        let mut grid = WasmGrid::new(2, 1);
+        grid.cells[0] = Cell { r: 100.0, g: 0.0, b: 0.0 };
+        grid.cells[1] = Cell { r: 0.0, g: 0.0, b: 0.0 };
+        grid.tick(0.2, 0.0);
+        assert!((grid.get_r(0, 0) - 80.0).abs() < 1e-9);
+        assert!((grid.get_r(1, 0) - 5.0).abs() < 1e-9);
     }
 }

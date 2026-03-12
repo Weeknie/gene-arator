@@ -109,7 +109,12 @@ document.addEventListener('DOMContentLoaded', () => {
       fpsDisplay.hideWarning();
       intervalId = setInterval(() => {
         const current = activeGrid();
-        current.tick();
+        // The Rust engine displays a static randomized grid until genetic code
+        // logic is ported. Skipping tick() prevents diffusion/decay from draining
+        // the initial proteins to zero (no genetic code to replenish them).
+        if (engineMode === 'js') {
+          current.tick();
+        }
         renderer.render(current);
         inspector.tick();
         fpsCounter.tick();
@@ -171,6 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
         inspector.grid = wasmEngine;
         // Rebuild the DOM grid using the WasmEngine dimensions/data.
         renderer.buildGrid(wasmEngine);
+        // Scroll the grid into view so it is immediately visible.
+        container.scrollIntoView({ block: 'start' });
         engineToggleBtn.textContent = '🦀 Switch to JS Engine';
       } catch (err) {
         console.error('Failed to load Rust engine:', err);
