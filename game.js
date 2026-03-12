@@ -10,6 +10,7 @@ import { presets } from './src/presets.js';
 import { FpsCounter } from './src/domain/FpsCounter.js';
 import { FpsDisplay } from './src/adapters/FpsDisplay.js';
 import { LowFpsWatcher } from './src/domain/LowFpsWatcher.js';
+import { WasmEngine } from './src/adapters/WasmEngine.js';
 
 // Initialize the game when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,6 +30,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const appContainer = document.querySelector('.container');
   const fpsDisplay = new FpsDisplay(appContainer);
   fpsDisplay.render();
+
+  // Engine state: 'js' uses the JavaScript Grid; 'rust' uses the WASM WasmEngine.
+  let engineMode = 'js';
+  let wasmEngine = null;
+  let wasmModuleLoaded = false;
+
+  /** Return the grid-compatible object for the currently active engine. */
+  function activeGrid() {
+    return engineMode === 'rust' && wasmEngine ? wasmEngine : grid;
+  }
   
   // Initial render
   renderer.buildGrid(grid);
@@ -97,8 +108,9 @@ document.addEventListener('DOMContentLoaded', () => {
       lowFpsWatcher.reset();
       fpsDisplay.hideWarning();
       intervalId = setInterval(() => {
-        grid.tick();
-        renderer.render(grid);
+        const current = activeGrid();
+        current.tick();
+        renderer.render(current);
         inspector.tick();
         fpsCounter.tick();
         const fps = fpsCounter.getFps();
@@ -131,7 +143,50 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
+  // --- Engine toggle ---
+  const engineToggleBtn = document.createElement('button');
+  engineToggleBtn.id = 'engine-toggle-btn';
+  engineToggleBtn.textContent = '⚙️ Switch to Rust Engine';
+  engineToggleBtn.className = 'engine-toggle-btn';
+  appContainer.appendChild(engineToggleBtn);
+
+  engineToggleBtn.addEventListener('click', async () => {
+    if (engineMode === 'js') {
+      // Switch to Rust engine
+      engineToggleBtn.textContent = '⏳ Loading Rust Engine…';
+      engineToggleBtn.disabled = true;
+      try {
+        if (!wasmModuleLoaded) {
+          // Dynamically import the WASM module (initialises the binary).
+          const wasmModule = await import('./wasm-engine/pkg/gene_arator_wasm.js');
+          await wasmModule.default();
+          const wasmGrid = new wasmModule.WasmGrid(currentGridSize, currentGridSize);
+          wasmGrid.randomize(0);
+          wasmEngine = new WasmEngine(wasmGrid, grid.diffusionRate, grid.decayRate);
+          wasmModuleLoaded = true;
+        }
+        engineMode = 'rust';
+        // Update inspector to use the Rust engine's cell data.
+        inspector.grid = wasmEngine;
+        // Rebuild the DOM grid using the WasmEngine dimensions/data.
+        renderer.buildGrid(wasmEngine);
+        engineToggleBtn.textContent = '🦀 Switch to JS Engine';
+      } catch (err) {
+        console.error('Failed to load Rust engine:', err);
+        engineToggleBtn.textContent = '⚙️ Switch to Rust Engine';
+      }
+      engineToggleBtn.disabled = false;
+    } else {
+      // Switch back to JS engine
+      engineMode = 'js';
+      inspector.grid = grid;
+      renderer.buildGrid(grid);
+      renderer.enableProteinInjection(grid, renderer.selectedProtein, 255);
+      engineToggleBtn.textContent = '⚙️ Switch to Rust Engine';
+    }
+  });
+
   // Auto-start the simulation
   startSimulation();
   
@@ -142,6 +197,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Apply diffusion and decay rate in-place (no stop, no clear)
     grid.diffusionRate = newSettings.diffusionRate;
     grid.decayRate = newSettings.decayRate;
+
+    // Keep wasmEngine rates in sync if it exists
+    if (wasmEngine) {
+      wasmEngine.diffusionRate = newSettings.diffusionRate;
+      wasmEngine.decayRate = newSettings.decayRate;
+    }
 
     // Only recreate grid when size actually changes
     if (newSettings.gridSize !== currentGridSize && newSettings.gridSize > 0) {
@@ -157,6 +218,17 @@ document.addEventListener('DOMContentLoaded', () => {
       // Set genetic code from the standalone input
       const codeTextarea = document.getElementById('genetic-code-input');
       grid.setGeneticCode(new GeneticCode(codeTextarea ? codeTextarea.value : ''));
+
+      // Invalidate the cached wasm engine so it is recreated with the new size
+      // on the next switch.
+      wasmEngine = null;
+      wasmModuleLoaded = false;
+
+      // Switch back to JS mode if currently using Rust engine
+      if (engineMode === 'rust') {
+        engineMode = 'js';
+        engineToggleBtn.textContent = '⚙️ Switch to Rust Engine';
+      }
 
       // Re-render
       renderer.buildGrid(grid);

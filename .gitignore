@@ -5,3 +5,7 @@ build/
 *.log
 .env
 coverage/
+
+# Rust / WASM build artifacts
+wasm-engine/target/
+wasm-engine/pkg/

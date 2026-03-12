@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build:wasm": "cd wasm-engine && wasm-pack build --target web --out-dir pkg"
   },
   "repository": {
     "type": "git",
